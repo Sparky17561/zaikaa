@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Order</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .order-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin: 20px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            background-color: #f9f9f9;
+            transition: background-color 0.3s ease;
+        }
+
+        .order-item:hover {
+            background-color: #e9ecef;
+        }
+
+        .item-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .item-price {
+            font-size: 1rem;
+            color: #666;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+        }
+
+        .quantity-controls button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 4px;
+            margin: 0 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .quantity-controls button:hover {
+            background-color: #0056b3;
+        }
+
+        .quantity-controls input {
+            width: 50px;
+            padding: 8px;
+            text-align: center;
+            font-size: 1.2rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .total {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .pay-button {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            width: 100%;
+            margin: 10px 0;
+            transition: background-color 0.3s ease;
+        }
+
+        .pay-button:hover {
+            background-color: #218838;
+        }
+
+        .back-home-button {
+            background-color: #dc3545;
+            color: white;
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            width: 100%;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-home-button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="order-container">
+        <h1>Confirm Your Order</h1>
+        <div id="selected-items">
+            <h2>Order Confirmation</h2>
+            <ul id="order-list">
+                {% for item in selected_items %}
+                    <li class="order-item">
+                        <div>
+                            <div class="item-name">{{ item.item_name }}</div>
+                            <div class="item-price">₹{{ item.price }}</div>
+                        </div>
+                        <div class="quantity-controls">
+                            <button class="decrease" data-item="{{ item }}">-</button>
+                            <input type="number" class="quantity-input" data-item="{{ item }}" value="1" min="1">
+                            <button class="increase" data-item="{{ item }}">+</button>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+            <div class="total">Total: ₹<span id="total-price">0</span></div>
+            <button class="pay-button" id="pay-cash">Pay by Cash</button>
+            <button class="pay-button" id="pay-online">Pay Online</button>
+            <button class="back-home-button" onclick="window.location.href='/food/'">Go Back to Home</button>
+        </div>
+    </div>
+
+    <script>
+        // Calculate total price dynamically
+        function updatePrice() {
+            let total = 0;
+            const items = document.querySelectorAll('.order-item');
+            items.forEach(item => {
+                const price = parseFloat(item.querySelector('.item-price').textContent.replace('₹', ''));
+                const quantity = parseInt(item.querySelector('.quantity-input').value);
+                total += price * quantity;
+            });
+            document.getElementById('total-price').textContent = total.toFixed(2);
+        }
+
+        // Update quantity and price dynamically
+        document.querySelectorAll('.increase').forEach(button => {
+            button.addEventListener('click', function() {
+                const input = document.querySelector(`.quantity-input[data-item="${this.dataset.item}"]`);
+                let quantity = parseInt(input.value) + 1;
+                input.value = quantity;
+                updatePrice();
+            });
+        });
+
+        document.querySelectorAll('.decrease').forEach(button => {
+            button.addEventListener('click', function() {
+                const input = document.querySelector(`.quantity-input[data-item="${this.dataset.item}"]`);
+                let quantity = Math.max(1, parseInt(input.value) - 1);
+                input.value = quantity;
+                updatePrice();
+            });
+        });
+
+        // Pay by cash or online functionality
+        document.getElementById('pay-cash').addEventListener('click', function() {
+            alert('Cash payment is not yet implemented.');
+        });
+
+        document.getElementById('pay-online').addEventListener('click', function() {
+            alert('Redirecting to online payment gateway.');
+        });
+
+        // Initialize the price on page load
+        updatePrice();
+    </script>
+
+</body>
+</html>

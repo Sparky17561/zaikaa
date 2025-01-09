@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Shops</title>
+    <style>
+        .shop {
+            margin-bottom: 20px;
+        }
+        .shop-name {
+            font-weight: bold;
+            font-size: 20px;
+        }
+        .item {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Select Items</h1>
+    <form id="order-form" method="POST" action="{% url 'process_order' %}">
+        {% csrf_token %}
+        <div id="shops-container">
+            {% for shop, items in shops.items %}
+                <div class="shop">
+                    <h3>{{ shop }}</h3>
+                    <ul>
+                        {% for item in items %}
+                            <li class="item">
+                                {{ item.item_name }} - ₹{{ item.price }} 
+                                ({{ item.availability }})
+                                <input type="checkbox" name="selected_items" value="{{ item.item_name }}">
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <button type="submit">Place Order</button>
+    </form>
+
+    <script>
+        // JavaScript for async form submission
+        const form = document.getElementById('order-form');
+        
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Create a FormData object to collect form data
+            const formData = new FormData(form);
+
+            // Send the form data asynchronously via Fetch API
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Check for success status in the response
+                if (data.status === 'success') {
+                    // Redirect to the confirmation page
+                    window.location.href = "/food/confirm-order/";
+                } else {
+                    alert('Error processing the order.');
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting form:', error);
+                alert('Error submitting the order.');
+            });
+        });
+    </script>
+</body>
+</html>
