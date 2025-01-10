@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookings</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+        .status-link {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .status-link:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Approved Orders</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Token ID</th>
+                <th>Order ID</th>
+                <th>Item Name</th>
+                <th>Quantity</th>
+                <th>Customer Name</th>
+                <th>Contact No</th>
+                <th>Order Date & Time</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order.0 }}</td>
+                    <td>{{ order.1 }}</td>
+                    <td>{{ order.2 }}</td>
+                    <td>{{ order.3 }}</td>
+                    <td>{{ order.4 }}</td>
+                    <td>{{ order.5 }}</td>
+                    <td>{% if order.7 %}{{ order.7|date:"D M d, Y H:i" }}{% else %}No Timestamp{% endif %}</td>
+                    <td>
+                        <div class="actions">
+                            {% if order.6 == 'Approved' %}
+                            <a href="{% url 'update_order_status' order_id=order.1 status='completed' %}" class="status-link">Mark as Completed</a>
+                            {% endif %}
+                            {% if order.6 == 'Completed' %}
+                                <a href="{% url 'update_order_status' order_id=order.1 status='delivered' %}" class="status-link">Mark as Delivered</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="8">No approved orders found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>

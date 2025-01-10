@@ -246,7 +246,13 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import connection
 import random
-@csrf_exempt  # For testing without CSRF issues (you may want to handle CSRF properly in production)
+from datetime import datetime
+import json
+import random
+from django.http import JsonResponse
+from django.db import connection
+from django.views.decorators.csrf import csrf_exempt
+@csrf_exempt
 def check_order_status(request):
     if request.method == "POST":
         try:
@@ -254,52 +260,66 @@ def check_order_status(request):
             email = data.get('email')  # Get the email from the parsed JSON
 
             if not email:
-                print("No email provided!")  # Debugging
                 return JsonResponse({'error': 'Email not provided'}, status=400)
 
-            print(f"Received email: {email}")  # Debugging
-
-            # Check if all items in the order are approved
+            # Check the count of pending items
             with connection.cursor() as cursor:
                 cursor.execute("""
                     SELECT COUNT(*) 
                     FROM OrderList 
                     WHERE email = %s AND status = 'Pending';
                 """, [email])
-                result = cursor.fetchone()
+                pending_count = cursor.fetchone()[0]
 
-            print(f"Query result: {result}")  # Debugging the result of the query
+            if pending_count > 0:
+                return JsonResponse({
+                    'status': 'pending',
+                    'message': f'{pending_count} item(s) still pending approval',
+                    'pending_count': pending_count  # Include pending count in response
+                })
 
-            if result:
-                pending_count = result[0]
-                print(f"Pending items count: {pending_count}")  # Debugging the count
+            # Check if there are any approved items without a token ID
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT COUNT(*)
+                    FROM OrderList
+                    WHERE email = %s AND status = 'Approved' AND tokenID IS NULL;
+                """, [email])
+                approved_count = cursor.fetchone()[0]
 
-                if pending_count == 0:
-                    # All items have been approved, generate token_id
-                    token_id = random.randint(1000, 9999)  # Example: Generate a random token ID
-                    print(f"Generated token_id: {token_id}")  # Debugging the token_id
+            if approved_count == 0:
+                return JsonResponse({
+                    'error': 'No approved items found for this email.',
+                    'status': 'failed',
+                    'pending_count': pending_count  # Include pending count even in failure
+                })
 
-                    # Update the orders with the generated token ID
-                    with connection.cursor() as cursor:
-                        cursor.execute("""
-                            UPDATE OrderList
-                            SET tokenID = %s
-                            WHERE email = %s AND status = 'Approved' AND tokenID IS NULL;
-                        """, [token_id, email])
+            # All conditions met; generate token ID and timestamp
+            token_id = random.randint(1000, 9999)
+            timestamp = datetime.now()
 
-                    # Return success with token_id
-                    return JsonResponse({'status': 'success', 'message': 'Order approved', 'token_id': token_id})
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    UPDATE OrderList
+                    SET tokenID = %s, timestamp = %s, mode_of_payment = 'cash'
+                    WHERE email = %s AND status = 'Approved' AND tokenID IS NULL;
+                """, [token_id, timestamp, email])
 
-                else:
-                    return JsonResponse({'status': 'pending', 'message': f'{pending_count} item(s) still pending approval'})
-
-            return JsonResponse({'error': 'Order not found for the given email'}, status=404)
+            # Return success response
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Order approved',
+                'token_id': token_id,
+                'timestamp': timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+                'pending_count': pending_count  # Include pending count in success
+            })
 
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
-
 
 
 def success(request, token_id):
@@ -353,3 +373,160 @@ def allorders(request):
 
     # Render the allorders.html template and pass all orders
     return render(request, 'food/allorders.html', {'all_orders': all_orders})
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from datetime import datetime
+from django.db import connection
+import logging
+
+logger = logging.getLogger(__name__)
+
+def past_orders(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            email = data.get("email")
+
+            if not email:
+                return JsonResponse({"error": "Email not provided"}, status=400)
+
+            with connection.cursor() as cursor:
+                # Fetch distinct token IDs, timestamp, mode_of_payment, and status for orders
+                cursor.execute("""
+                    SELECT DISTINCT tokenID, timestamp, mode_of_payment
+                    FROM OrderList
+                    WHERE email = %s AND tokenID IS NOT NULL
+                    ORDER BY timestamp DESC;
+                """, [email])
+                tokens = cursor.fetchall()
+
+            if not tokens:
+                return JsonResponse({"orders": []}, status=200)
+
+            orders = []
+            for token_id, timestamp, mode_of_payment in tokens:
+                logger.info(f"Fetching order for token_id: {token_id}")  # Log token_id
+
+                with connection.cursor() as cursor:
+                    # Fetch items and their statuses for each token
+                    cursor.execute("""
+                        SELECT s.shop_name, o.item_name, o.qty, o.total_amt, o.status
+                        FROM OrderList o
+                        JOIN Shops s ON o.shop_id = s.shop_id
+                        WHERE o.tokenID = %s;
+                    """, [token_id])
+                    items = cursor.fetchall()
+
+                grand_total = sum(item[3] for item in items)
+                orders.append({
+                    "token_id": token_id,
+                    "timestamp": timestamp.strftime("%d %B %Y, %I:%M %p") if isinstance(timestamp, datetime) else "Unknown Date",
+                    "mode_of_payment": mode_of_payment,
+                    "items": [
+                        {
+                            "shop_name": item[0],
+                            "item_name": item[1],
+                            "quantity": item[2],
+                            "total_amount": item[3],
+                            "status": item[4]  # Item-specific status
+                        }
+                        for item in items
+                    ],
+                    "grand_total": grand_total
+                })
+
+            return JsonResponse({"orders": orders}, status=200)
+
+        except Exception as e:
+            logger.error(f"Error fetching past orders: {str(e)}")
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+def past_orders_page(request):
+    return render(request, 'food/past_orders.html')
+
+
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.db import connection
+from django.contrib import messages
+import random
+import string
+
+# View to handle login for stalls
+def stall_login(request):
+    if request.method == "POST":
+        shop_id = request.POST.get('shop_id')
+        passkey = request.POST.get('passkey')
+
+        if not shop_id or not passkey:
+            messages.error(request, "Shop ID and passkey are required.")
+            return redirect('stall_login')
+
+        # Check if the shop exists and the passkey is correct
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT passkey FROM Shops WHERE shop_id = %s;
+            """, [shop_id])
+            result = cursor.fetchone()
+
+        if result and result[0] == passkey:
+            request.session['shop_id'] = shop_id  # Store shop_id in session
+            return redirect('bookings')  # Redirect to the bookings page
+        else:
+            messages.error(request, "Invalid shop ID or passkey.")
+            return redirect('stall_login')
+
+    return render(request, 'food/stall_login.html')
+def bookings(request):
+    shop_id = request.session.get('shop_id')
+    if not shop_id:
+        return redirect('stall_login')
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT o.tokenID, o.order_id, o.item_name, o.qty, o.name, o.contact_no, o.status, o.timestamp
+            FROM OrderList o
+            WHERE o.shop_id = %s AND o.status IN ('Approved', 'Completed')
+            ORDER BY o.timestamp DESC;
+        """, [shop_id])
+        orders = cursor.fetchall()
+
+    # Debugging: print out orders to check if data is being fetched correctly
+    print("Orders:", orders)
+
+    return render(request, 'food/bookings.html', {'orders': orders})
+
+
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.contrib import messages
+from django.db import connection
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.db import connection
+from django.http import HttpResponse
+
+from django.shortcuts import redirect
+from django.contrib import messages
+
+def update_order_status(request, order_id, status):
+    if status not in ['completed', 'delivered']:
+        return HttpResponse("Invalid status", status=400)
+
+    # Update the order status in the database
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            UPDATE OrderList
+            SET status = %s
+            WHERE order_id = %s;
+        """, [status.capitalize(), order_id])
+
+    # Provide a success message
+    messages.success(request, f"Order {order_id} marked as {status.capitalize()}!")
+
+    # Redirect to the same stall bookings page
+    return redirect('bookings')  # Redirecting to 'stall/bookings' URL instead of 'past_orders'

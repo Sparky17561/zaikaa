@@ -44,6 +44,22 @@
             color: #4CAF50;
             margin-bottom: 20px;
         }
+
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -54,6 +70,9 @@
         <div class="status" id="status">
             Token ID: {{ token_id }}
         </div>
+
+        <!-- View Orders Button -->
+        <a href="{% url 'past_orders_page' %}" class="btn">View Orders</a>
     </div>
 
 </body>

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Waiting for Approval</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -56,37 +57,58 @@
     <div class="container">
         <h1>Waiting for Admin Approval</h1>
         <p>Your order is being processed and is waiting for approval. Please be patient.</p>
-        <div class="status" id="status">Status: Pending</div>
-        <div class="loading">Refreshing every 50 seconds...</div>
+        <div class="status" id="status" aria-live="polite">Status: Pending</div>
+        <div class="loading">Refreshing every 10 seconds...</div>
     </div>
 
     <script>
-       const email = "saiprasad.jamdar17561@sakec.ac.in"; // Replace with actual email input from the form
+       
+    const email = "abhinav@sakec.ac.in"; // Replace with actual email input from the form
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        // Check the order status periodically every 10 seconds
-        setInterval(function() {
+    if (!email) {
+        console.error('Email is not provided');
+        alert('Email is missing. Please log in again.');
+    } else {
+        let pollingInterval = null;
+
+        function checkStatus() {
             fetch('/food/check_order_status/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'  // Add CSRF token for security
+                    'X-CSRFToken': csrfToken
                 },
                 body: JSON.stringify({ email: email })
             })
             .then(response => response.json())
             .then(data => {
+                const statusElement = document.getElementById('status');
                 const status = data.status;
-                document.getElementById('status').textContent = `Status: ${status}`;
-                
+
+                statusElement.textContent = `Status: ${status.charAt(0).toUpperCase() + status.slice(1)}`;
+
                 if (status === 'success') {
+                    clearInterval(pollingInterval); // Stop polling
                     // Redirect to the success page with token_id
                     window.location.href = `/food/success/${data.token_id}/`;
+                } else if (status === 'error') {
+                    alert(data.message || 'An error occurred. Please try again later.');
+                    console.error('Error:', data.message);
                 }
             })
-            .catch(error => console.error('Error fetching order status:', error));
-        }, 10000);  // 10 seconds refresh interval
+            .catch(error => {
+                console.error('Error fetching order status:', error);
+                alert('Failed to fetch order status. Please check your connection.');
+            });
+        }
 
-    </script>
+        // Start polling every 10 seconds
+        pollingInterval = setInterval(checkStatus, 10000);
+        checkStatus(); // Initial call
+    }
+</script>
+
 
 </body>
 </html>
