@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Shop</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .add-item {
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add Shop</h1>
+
+        <form id="addShopForm" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="shopName">Shop Name</label>
+                <input type="text" id="shopName" name="shop_name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="shopPasskey">Passkey</label>
+                <input type="text" id="shopPasskey" name="passkey" required>
+            </div>
+
+            <h2>Menu Items</h2>
+            <div id="menuItemsContainer">
+                <div class="form-group">
+                    <input type="text" name="item_name[]" placeholder="Item Name" required>
+                    <input type="number" name="item_price[]" placeholder="Price" required>
+                </div>
+            </div>
+            <button type="button" class="add-item" onclick="addMenuItem()">Add Item</button>
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        function addMenuItem() {
+            const container = document.getElementById('menuItemsContainer');
+            const newItem = document.createElement('div');
+            newItem.classList.add('form-group');
+            newItem.innerHTML = `
+                <input type="text" name="item_name[]" placeholder="Item Name" required>
+                <input type="number" name="item_price[]" placeholder="Price" required>
+            `;
+            container.appendChild(newItem);
+        }
+
+        document.getElementById('addShopForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            fetch('/food/admin/add_shop/', {
+                method: 'POST',
+                body: formData,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) {
+                        location.href = '/food/admin/panel/';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>

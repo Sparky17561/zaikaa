@@ -113,6 +113,10 @@
 <body>
 
     <h1>Your Past Orders</h1>
+    <p><strong>Email:</strong> {{ user_email }}</p>
+    <p><strong>Name:</strong> {{ user_name }}</p>
+    <p><strong>Phone:</strong> {{ user_phone }}</p>
+
     <button id="fetch-orders-btn">Fetch Orders</button>
     <div id="loading" class="loading">Loading...</div>
     <div id="orders"></div>
@@ -123,7 +127,7 @@
     </form>
 
     <script>
-        const email = "abhinav@sakec.ac.in"; // Replace with actual email input
+        const email = "{{ user_email }}";  // Using the passed email from the backend
         const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]')?.value;
 
         const fetchOrdersButton = document.getElementById('fetch-orders-btn');
@@ -131,7 +135,7 @@
         const ordersDiv = document.getElementById('orders');
 
         fetchOrdersButton.addEventListener('click', () => {
-            loadingElement.style.display = 'block'; // Show loading indicator
+            loadingElement.style.display = 'block';  // Show loading indicator
             fetch('/food/past_orders/api/', {  // Correct API URL
                 method: 'POST',
                 headers: {
@@ -142,15 +146,15 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Received data:', data); // Print the received data in console
-                loadingElement.style.display = 'none'; // Hide loading indicator
+                console.log('Received data:', data);  // Print the received data in console
+                loadingElement.style.display = 'none';  // Hide loading indicator
 
                 if (data.orders.length === 0) {
                     ordersDiv.innerHTML = '<p>No past orders found.</p>';
                     return;
                 }
 
-                ordersDiv.innerHTML = ''; // Clear any previous orders
+                ordersDiv.innerHTML = '';  // Clear any previous orders
                 data.orders.forEach(order => {
                     const orderDiv = document.createElement('div');
                     orderDiv.className = 'order-container';
@@ -163,9 +167,6 @@
                         </div>
                         <div class="items-container">
                             ${order.items.map(item => {
-                                // Log item structure to console
-                                console.log(item); 
-
                                 return `
                                     <div class="item">
                                         <div class="item-details">
@@ -199,7 +200,7 @@
 
         function getStatusClass(status) {
             if (!status) return ''; // Handle undefined or null status
-            status = status.trim().toLowerCase();  // Ensure status is lowercase and handle extra spaces
+            status = status.trim().toLowerCase();
             if (status === 'approved') return 'status-approved';
             if (status === 'completed') return 'status-completed';
             if (status === 'delivered') return 'status-delivered';
@@ -208,13 +209,12 @@
 
         function getStatusText(status) {
             if (!status) return 'Unknown Status'; // Handle undefined or null status
-            status = status.trim().toLowerCase();  // Ensure status is lowercase and handle extra spaces
+            status = status.trim().toLowerCase();
             if (status === 'approved') return 'Cooking';
             if (status === 'completed') return 'Ready to Take';
             if (status === 'delivered') return 'Delivered';
             return 'Unknown Status'; // Default text for unknown status
         }
-
     </script>
 
 </body>

@@ -5,6 +5,11 @@ from django.shortcuts import redirect, render
 from django.http import JsonResponse
 from django.db import connection
 import json
+# Home view to display all stalls and handle item selection
+import json
+import json
+
+import json
 def home(request):
     # Execute raw SQL query
     with connection.cursor() as cursor:
@@ -25,7 +30,7 @@ def home(request):
             ORDER BY 
                 s.shop_name, m.name;
         """)
-        
+
         # Fetch all results
         rows = cursor.fetchall()
 
@@ -64,10 +69,20 @@ def home(request):
                 'price': float(item_data['price']),
                 'shop_id': int(item_data['shop_id']),
             })
-
+        request.session.clear()
         # Store formatted items in the session
         request.session['selected_items'] = formatted_items
+        
+        # Store user details in session
+        request.session['user_name'] = request.POST.get('name')
+        request.session['user_email'] = request.POST.get('email')
+        request.session['user_phone'] = request.POST.get('phone')
+        # Print the entire session to see what is stored
+        # Print all keys in the session
+        print(f"Session keys: {list(request.session.keys())}")
 
+        # Print the entire session dictionary
+        print(f"Full session data: {dict(request.session)}")
         # Redirect to confirmation page
         return redirect('confirm_order')
 
@@ -75,19 +90,29 @@ def home(request):
     return render(request, 'food/home.html', {'shops': shops})
 
 
+
+
+
 def confirm_order(request):
     # Retrieve the selected items from the session
     selected_items = request.session.get('selected_items', [])
+    
+    # Retrieve user details from session
+    user_name = request.session.get('user_name')
+    user_email = request.session.get('user_email')
+    user_phone = request.session.get('user_phone')
 
     # If no items are selected, redirect to the home page
     if not selected_items:
         return redirect('home')
 
-    # Print the selected items to verify if they are being retrieved correctly
-    print(f"Selected Items in session: {selected_items}")
-
-    # Pass the selected items to the template
-    return render(request, 'food/confirm_order.html', {'selected_items': selected_items})
+    # Pass the selected items and user details to the template
+    return render(request, 'food/confirm_order.html', {
+        'selected_items': selected_items,
+        'user_name': user_name,
+        'user_email': user_email,
+        'user_phone': user_phone
+    })
 
 
 
@@ -115,24 +140,60 @@ from django.db import connection
 import json
 import re
 from django.http import HttpResponse
+from django.http import HttpResponse
+from django.shortcuts import redirect
+import re
+import json
+from django.db import connection, transaction
+import re
+from django.db import transaction, connection
+from django.shortcuts import redirect
+from django.http import HttpResponse
+import json
+from django.shortcuts import render, redirect
+from django.db import connection, transaction
+from django.http import HttpResponse
+import json
+import re
+
+from django.shortcuts import render, redirect
+from django.db import transaction, connection
+import json
+import re
+from django.http import HttpResponse
+
+from django.shortcuts import render, redirect
+from django.db import transaction, connection
+from django.http import HttpResponse
+import json
+import re
 
 def settinguporder(request):
-    # Get form data
+    # Get form data (from the form submitted)
     user_name = request.POST.get('name')
-    user_email = request.POST.get('email')  # Get email from the form
+    user_email = request.POST.get('email')
     mobile = request.POST.get('mobile')
     
-    # Get selected items from session (just in case you also need them)
+    # Update session with the new user details
+    request.session['user_name'] = user_name
+    request.session['user_email'] = user_email
+    request.session['user_mobile'] = mobile
+    # Print all keys in the session
+    print(f"Session keys: {list(request.session.keys())}")
+
+    # Print the entire session dictionary
+    print(f"Full session data: {dict(request.session)}")
+
+    # Get selected items from session
     selected_items = request.session.get('selected_items', [])
     
-    # Extract shop IDs from selected items
-    shop_ids = list(set(item['shop_id'] for item in selected_items))  # Ensure no duplicates
+    # Extract shop IDs from selected items (ensure no duplicates)
+    shop_ids = list(set(item['shop_id'] for item in selected_items))
     
     total_amount = float(request.POST.get('total'))  # Get the total amount from the form
-    # Parse the JSON string into a Python object (list of items)
     items = json.loads(request.POST.get('order_items'))  # Get a list of items from the form
     
-    # Print the data to check if they are being received properly
+    # Print the data for debugging
     print(f"User Name: {user_name}")
     print(f"User Email: {user_email}")
     print(f"Mobile: {mobile}")
@@ -149,62 +210,76 @@ def settinguporder(request):
         with transaction.atomic():  # Start a transaction block
             # Query 1: Add user to the Users table (if not already added)
             with connection.cursor() as cursor:
-                # Check if the user already exists by mobile number or email
                 cursor.execute(""" 
                     SELECT user_id FROM Users WHERE mobile = %s OR email = %s;
                 """, [mobile, user_email])
                 result = cursor.fetchone()
 
                 if result:
-                    # If user exists, use the existing user_id
                     user_id = result[0]
                     print(f"User ID already exists: {user_id}")
                 else:
-                    # If user doesn't exist, insert a new record
                     cursor.execute(""" 
                         INSERT INTO Users (name, email, mobile)
                         VALUES (%s, %s, %s);
                     """, [user_name, user_email, mobile])
                     print("Executed INSERT into Users table")
-
-                    # Get the last inserted user_id
                     cursor.execute("SELECT LAST_INSERT_ID();")
                     user_id = cursor.fetchone()[0]
                     print(f"User ID: {user_id}")
 
-            # Query 2: Insert into OrderList for each shop_id in the selected items
+            # Query 2: Check if items are available before inserting into OrderList
             with connection.cursor() as cursor:
                 for shop_id in shop_ids:
-                    # Filter items by shop_id (ensure we match the shop_id of the item correctly)
                     shop_items = [item for item in items if re.search(r'\(Shop ID: (\d+)\)', item['item_name']) and int(re.search(r'\(Shop ID: (\d+)\)', item['item_name']).group(1)) == shop_id]
                     
                     for item in shop_items:
-                        # Extract item details directly from the parsed JSON object
                         item_name = item['item_name']
                         quantity = item['quantity']
-                        price = float(item['price'])  # Ensure price is treated as a float
+                        price = float(item['price'])
                         
-                        # Calculate the total price (quantity * price)
-                        total_price = quantity * price
-
-                        # Insert the item into OrderList table for the specific shop
+                        match = re.match(r'^(.*?) \(Shop ID: \d+\)$', item_name)
+                        item_name_without_shop = match.group(1) if match else item_name
+                        
                         cursor.execute(""" 
-                            INSERT INTO OrderList (email, name, contact_no, shop_id, item_name, qty, total_amt, status)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
-                        """, [user_email, user_name, mobile, shop_id, item_name, quantity, total_price, 'Pending'])
-                        print(f"Executed INSERT into OrderList table: User ID = {user_id}, Shop ID = {shop_id}, Item = {item_name}, Quantity = {quantity}, Price = {price}, Total Price = {total_price}")
+                            SELECT availability FROM MenuItems WHERE shop_id = %s AND name = %s;
+                        """, [shop_id, item_name_without_shop])
+                        result = cursor.fetchone()
+                        
+                        if result:
+                            availability = result[0]
+                            if availability == 1:
+                                total_price = quantity * price
+                                cursor.execute(""" 
+                                    INSERT INTO OrderList (email, name, contact_no, shop_id, item_name, qty, total_amt, status)
+                                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
+                                """, [user_email, user_name, mobile, shop_id, item_name_without_shop, quantity, total_price, 'Pending'])
+                                print(f"Executed INSERT into OrderList table: User ID = {user_id}, Shop ID = {shop_id}, Item = {item_name_without_shop}, Quantity = {quantity}, Price = {price}, Total Price = {total_price}")
+                            else:
+                                error_message = f"The item '{item_name_without_shop}' is unavailable at Shop ID {shop_id}. Please check availability or remove the item."
+                                raise Exception(error_message)
+                        else:
+                            error_message = f"The item '{item_name_without_shop}' was not found in the menu at Shop ID {shop_id}. Please check availability or remove the item."
+                            raise Exception(error_message)
 
-        # After completing the queries, redirect to the waiting page
         print("Order processing completed successfully")
-        return redirect('waiting')  # Assuming you have a URL named 'waiting'
+        return redirect('waiting')  # Redirect to a waiting page for further processing
 
     except Exception as e:
-        # If any error occurs, rollback the transaction
         print(f"Error while processing the order: {e}")
         transaction.rollback()  # Rollback the transaction if an error occurs
-        # Optionally log the error
-        # Redirect to an error page or show a message
-        return HttpResponse("An error occurred while processing your order. Please try again.", status=500)
+        error_message = f"""
+        An error occurred while processing your order. This could be because:
+        1. The item you selected is unavailable.
+        2. The item was not found in the menu.
+        
+        Please visit the homepage and try again. <br>
+        <a href="http://127.0.0.1:8000/">Go to Homepage</a>
+        """
+        return HttpResponse(error_message, status=500)
+
+
+
 
 import random
 from django.db import connection
@@ -329,7 +404,13 @@ def success(request, token_id):
 
 # views.py
 def waiting(request):
-    return render(request, 'food/waiting.html')
+    # Retrieve user_email from session or another source
+    user_email = request.session.get('user_email')  # Assuming it's passed from the form
+    print(f"User email from session: {user_email}")
+    return render(request, 'food/waiting.html', {
+        'user_email': user_email
+    })
+
 
 
 from django.shortcuts import render, redirect
@@ -445,8 +526,21 @@ def past_orders(request):
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
 
+from django.shortcuts import render
+
 def past_orders_page(request):
-    return render(request, 'food/past_orders.html')
+    # Assuming the user information is stored in the session
+    user_email = request.session.get('user_email')
+    user_name = request.session.get('user_name')
+    user_phone = request.session.get('user_phone')
+
+    # Pass the data to the template
+    return render(request, 'food/past_orders.html', {
+        'user_email': user_email,
+        'user_name': user_name,
+        'user_phone': user_phone
+    })
+
 
 
 from django.shortcuts import render, redirect
@@ -530,3 +624,184 @@ def update_order_status(request, order_id, status):
 
     # Redirect to the same stall bookings page
     return redirect('bookings')  # Redirecting to 'stall/bookings' URL instead of 'past_orders'
+
+
+
+
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.contrib import messages
+
+# Dummy admin credentials
+ADMIN_EMAIL = "saiprasad.jamdar17561@sakec.ac.in"
+ADMIN_PASSWORD = "031004"
+
+def admin_login(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+
+        if email == ADMIN_EMAIL and password == ADMIN_PASSWORD:
+            request.session['admin_logged_in'] = True
+            return redirect('admin_panel')
+        else:
+            messages.error(request, "Invalid email or password")
+            return redirect('admin_login')
+
+    return render(request, 'food/admin_login.html')
+
+
+from django.shortcuts import render, redirect
+from django.db import connection
+
+def admin_panel(request):
+    if not request.session.get('admin_logged_in'):
+        return redirect('admin_login')
+
+    # Fetch all shops and their menu items
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT s.shop_id, s.shop_name, m.id, m.name, m.price, m.availability
+            FROM Shops s
+            LEFT JOIN MenuItems m ON s.shop_id = m.shop_id
+        """)
+        data = cursor.fetchall()
+
+    # Debugging: Print the raw data to see what's being fetched
+    print("Fetched data:", data)
+
+    # Organize data into a structured format
+    shops = {}
+    for row in data:
+        shop_id, shop_name, item_id, item_name, price, availability = row
+        print(f"Processing shop_id: {shop_id}, shop_name: {shop_name}")  # Debugging
+        if shop_id not in shops:
+            shops[shop_id] = {
+                'shop_name': shop_name,
+                'items': []
+            }
+        if item_id:  # Only append items if they exist
+            shops[shop_id]['items'].append({
+                'id': item_id,
+                'name': item_name,
+                'price': price,
+                'availability': availability
+            })
+
+    # Debugging: Print the final structure of shops
+    print("Shops structure:", shops)
+
+    context = {
+        'shops': shops
+    }
+    return render(request, 'food/admin_panel.html', context)
+
+
+
+def admin_logout(request):
+    request.session.flush()
+    return redirect('admin_login')
+
+
+def add_shop(request):
+
+
+    
+    if request.method == 'POST':
+        shop_name = request.POST.get('shop_name')
+        passkey = request.POST.get('passkey')
+        item_names = request.POST.getlist('item_name[]')
+        item_prices = request.POST.getlist('item_price[]')
+
+        cursor = connection.cursor()
+        cursor.execute("INSERT INTO Shops (shop_name, passkey) VALUES (%s, %s)", [shop_name, passkey])
+        shop_id = cursor.lastrowid
+
+        for name, price in zip(item_names, item_prices):
+            cursor.execute(
+                "INSERT INTO MenuItems (name, price, shop_id, availability) VALUES (%s, %s, %s, %s)",
+                [name, price, shop_id, 1]
+            )
+
+        return JsonResponse({'success': True, 'message': 'Shop and items added successfully!'})
+
+from django.views.decorators.csrf import csrf_protect
+
+@csrf_protect
+def delete_shop(request, shop_id):
+
+
+    
+    # Logic to delete shop and associated items
+    if request.method == 'POST':
+        try:
+            # Delete all menu items related to the shop
+            with connection.cursor() as cursor:
+                cursor.execute("DELETE FROM MenuItems WHERE shop_id = %s", [shop_id])
+
+            # Delete the shop itself
+            with connection.cursor() as cursor:
+                cursor.execute("DELETE FROM Shops WHERE shop_id = %s", [shop_id])
+
+            return JsonResponse({"success": True, "message": "Shop and its items deleted successfully."})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
+
+    return JsonResponse({"success": False, "message": "Invalid request."})
+
+
+
+
+def shop_listing(request):
+    if not request.session.get('admin_logged_in'):
+        return redirect('admin_login')
+    
+    return render(request,'food/shop_listing.html')
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_protect
+from django.db import connection
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_protect
+import json
+from django.db import connection
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_protect
+import json
+from django.db import connection
+from django.template.loader import render_to_string
+from django.shortcuts import redirect
+from django.http import JsonResponse
+from django.db import connection
+from django.views.decorators.csrf import csrf_protect
+
+@csrf_protect
+def toggle_availability(request, item_id):
+
+    if not request.session.get('admin_logged_in'):
+        return redirect('admin_login')
+    
+    if request.method == 'POST':
+        try:
+            # Toggle availability using the MySQL CASE statement
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    UPDATE MenuItems
+                    SET availability = CASE
+                        WHEN availability = 1 THEN 0
+                        WHEN availability = 0 THEN 1
+                    END
+                    WHERE id = %s
+                    """, [item_id])
+
+            # Redirect to the admin panel to re-render the page with updated data
+            return redirect('admin_panel')
+
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
+
+    return JsonResponse({"success": False, "message": "Invalid request."})
+
+

@@ -3,18 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
     <title>Confirm Order</title>
     <style>
-        /* Styling omitted for brevity */
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .order-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-field {
+            margin-bottom: 15px;
+        }
+        .form-field input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-field input:focus {
+            border-color: #66afe9;
+            outline: none;
+        }
+        .order-item {
+            background-color: #f8f8f8;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+        }
+        .quantity-controls button {
+            padding: 5px 10px;
+            background-color: #ddd;
+            border: none;
+            cursor: pointer;
+            margin: 0 5px;
+            border-radius: 4px;
+        }
+        .pay-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            margin: 20px 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .pay-button:hover {
+            background-color: #45a049;
+        }
+        .total {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: right;
+        }
+        .back-home-button {
+            padding: 10px 20px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .back-home-button:hover {
+            background-color: #e53935;
+        }
     </style>
 </head>
 <body>
 
     <div class="order-container">
         <h1>Confirm Your Order</h1>
+        
+        <!-- User Information Form -->
         <form action="{% url 'settinguporder' %}" method="POST" id="order-form">
             {% csrf_token %}
+            <div>
+                <h2>User Information</h2>
+                <div class="form-field">
+                    <input type="text" name="name" placeholder="Enter your name" value="{{ user_name }}" required>
+                </div>
+                <div class="form-field">
+                    <input type="email" name="email" placeholder="Enter your email" value="{{ user_email }}" required>
+                </div>
+                <div class="form-field">
+                    <input type="text" name="phone" placeholder="Enter your mobile number" value="{{ user_phone }}" required>
+                </div>
+            </div>
+
             <div id="selected-items">
                 <h2>Order Confirmation</h2>
                 <ul id="order-list">
@@ -34,27 +130,17 @@
                 </ul>
 
                 <div class="total">Total: ₹<span id="total-price">0</span></div>
-                
+
                 <!-- Hidden input to send the total amount -->
                 <input type="hidden" name="total" id="total-input">
 
                 <!-- Hidden field to send the order items as JSON -->
                 <input type="hidden" name="order_items" id="order-items-input">
 
-                <!-- Name, Email, and Contact Number Fields -->
-                <div class="form-field">
-                    <input type="text" name="name" placeholder="Enter your name" required>
-                </div>
-                <div class="form-field">
-                    <input type="email" name="email" placeholder="Enter your email" required>
-                </div>
-                <div class="form-field">
-                    <input type="text" name="mobile" placeholder="Enter your mobile number" required>
-                </div>
-
                 <button type="submit" class="pay-button" id="pay-cash">Pay by Cash</button>
                 <button type="submit" class="pay-button" id="pay-online">Pay Online</button>
             </div>
+
             <button class="back-home-button" onclick="window.location.href='/food/'">Go Back to Home</button>
         </form>
     </div>

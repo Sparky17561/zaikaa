@@ -54,11 +54,37 @@
         .btn-approve:hover {
             background-color: #45a049;
         }
+
+        .btn-admin-panel {
+            padding: 10px 20px;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn-admin-panel:hover {
+            background-color: #007B9E;
+        }
+
+        a{
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <!-- Button to go to the admin panel -->
+        <a href="{% url 'admin_panel' %}">
+            <button class="btn-admin-panel">Go to Admin Panel</button>
+        </a>
+
         <h1>Pending Orders for Approval</h1>
         <table>
             <thead>
