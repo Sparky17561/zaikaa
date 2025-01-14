@@ -1,0 +1,75 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Zaikaa</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/home.css' %}" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+</head>
+<body>
+    <nav>
+        <h2>ECell</h3>
+        <h2>Food Fiesta</h3>
+        <div class="nav-part2">
+          
+          <details>
+            <summary>
+              <i class="ri-menu-fold-fill"></i>
+            </summary>
+            <ul>
+              <li ><i class="ri-restaurant-line"><a  href="{% url 'home' %}">Menu Page</a></i></li>
+              <li ><i class="ri-shopping-bag-2-line"><a class="nav-link" href="{% url 'past_orders_page'%}">Past Orders</a></i></li>
+            </ul>
+          </details>
+            
+        </div>
+      </nav>
+    <div class="shop-container">
+        <h1>Choose Your Items</h1>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="shops">
+              {% for shop_name, shop_info in shops.items %}
+                <h3>{{ shop_name }}</h3>
+                <ul>
+                  {% for item in shop_info.items %}
+                    <li>
+                      <label>
+                        <!-- Manually create the JSON string in the value field -->
+                        <input type="checkbox" name="selected_items" value='{"item_id": {{ item.item_id }}, "item_name": "{{ item.item_name }}", "price": "{{ item.price }}", "availability": "{{ item.availability }}", "shop_id": {{ item.shop_id }} }'>
+                        {{ item.item_name }} - ${{ item.price }}
+                      </label>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% endfor %}
+            </div>
+
+            <div class="user-info">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required><br><br>
+            
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required><br><br>
+            
+                    <label for="phone">Phone Number</label>
+                    <input type="text" name="phone" required>
+                </div>
+
+            <button type="submit">Confirm Order</button>
+          </form>
+          
+          
+          
+           
+    </div>
+
+</body>
+</html>

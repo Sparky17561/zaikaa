@@ -1,0 +1,65 @@
+<!-- Final Merged HTML with the frontend and backend integrated -->
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Past Order Confirmation</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{% static 'css/past_orders.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="{% static 'js/past_orders.js' %}" defer></script>
+</head>
+<body>
+    <div class="container">
+
+        <nav>
+        <h2>ECell</h3>
+        <h2>Food Fiesta</h3>
+        <div class="nav-part2">
+          
+          <details>
+            <summary>
+              <i class="ri-menu-fold-fill"></i>
+            </summary>
+            <ul>
+              <li class="nav-link"><i class="ri-restaurant-line"><a  href="#">Menu Page</a></i></li>
+              <li class="nav-link"><i class="ri-shopping-bag-2-line"><a class="nav-link" href="#">Past Orders</a></i></li>
+            </ul>
+          </details>
+            
+        </div>
+      </nav>
+
+      
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Past Order Confirmation</h1>
+                <p id="order-info" class="order-info">Order details for: {{ user_name }} ({{ user_email }})</p>
+            </div>
+            <div class="card-content" id="order-details">
+                <!-- Order details will be inserted here by JavaScript -->
+            </div>
+            <div class="card-footer">
+                <div class="total-amount">
+                    <span>Total Amount:</span>
+                    <span id="total-amount"></span>
+                </div>
+            </div>
+        </div>
+
+        <button id="fetch-orders-btn">Fetch Orders</button>
+        <div id="loading" class="loading">Loading...</div>
+        <div id="orders"></div>
+
+        <!-- CSRF Token -->
+        <form id="csrf-form" style="display:none;">
+            {% csrf_token %}
+        </form>
+    </div>
+</body>
+</html>

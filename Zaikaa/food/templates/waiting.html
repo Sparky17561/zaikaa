@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Waiting for Approval</title>
+    <meta name="csrf-token" content="{{ csrf_token }}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/waiting.css' %}" />
+    <script src="{% static 'js/waiting.js' %}" defer></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Waiting for Admin Approval</h1>
+      <p>
+        Your order is being processed and is waiting for approval. Please be
+        patient.
+      </p>
+      <div class="status" id="status" aria-live="polite">Status: Pending</div>
+      <div class="loading">Refreshing every 10 seconds...</div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Orders</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/allorders.css' %}" />
+    <script src="{% static 'js/allorders.js' %}" defer></script>
+</head>
+<body>
+
+    <div class="container">
+        <h1>All Orders</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>User Name</th>
+                    <th>Contact</th>
+                    <th>Item Name</th>
+                    <th>Quantity</th>
+                    <th>Total Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in all_orders %}
+                    <tr>
+                        <td>{{ order.0 }}</td>
+                        <td>{{ order.2 }}</td>
+                        <td>{{ order.3 }}</td>
+                        <td>{{ order.4 }}</td>
+                        <td>{{ order.5 }}</td>
+                        <td>₹{{ order.6 }}</td>
+                        <td>{{ order.7 }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7">No orders available</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

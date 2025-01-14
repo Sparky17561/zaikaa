@@ -1,0 +1,107 @@
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background: linear-gradient(to right, #ffecd2, #fcb69f);
+  margin: 0;
+  padding: 0;
+  color: #4a4a4a;
+}
+
+.shop-container {
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 36px;
+  font-weight: bold;
+}
+
+h3 {
+  color: #ff6f61;
+  margin-bottom: 15px;
+  font-size: 22px;
+}
+
+.shops ul {
+  list-style: none;
+  padding: 0;
+}
+
+.shops li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.shops li:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.shops li label {
+  font-size: 16px;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.shops li input {
+  margin-right: 15px;
+  transform: scale(1.2);
+}
+
+input[type="text"],
+input[type="email"] {
+  width: calc(100% - 20px);
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+input:focus {
+  outline: none;
+  border-color: #ff6f61;
+  box-shadow: 0 0 5px rgba(255, 111, 97, 0.6);
+}
+
+button {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(to right, #ff6f61, #ff9068);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background: linear-gradient(to right, #ff9068, #ff6f61);
+}
+
+.user-info {
+  margin-top: 30px;
+}
+
+.user-info label {
+  font-size: 16px;
+  font-weight: bold;
+}

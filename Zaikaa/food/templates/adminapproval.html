@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Approval</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/adminapproval.css' %}" />
+    <script src="{% static 'js/adminapproval.js' %}" defer></script>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Button to go to the admin panel -->
+        <a href="{% url 'admin_panel' %}">
+            <button class="btn-admin-panel">Go to Admin Panel</button>
+        </a>
+
+        <h1>Pending Orders for Approval</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>User Name</th>
+                    <th>Contact</th>
+                    <th>Item Name</th>
+                    <th>Quantity</th>
+                    <th>Total Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in pending_orders %}
+                    <tr>
+                        <td>{{ order.0 }}</td>
+                        <td>{{ order.2 }}</td>
+                        <td>{{ order.3 }}</td>
+                        <td>{{ order.4 }}</td>
+                        <td>{{ order.5 }}</td>
+                        <td>₹{{ order.6 }}</td>
+                        <td>
+                            <form action="{% url 'approve_order' order.0 %}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-approve">Approve</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7">No pending orders</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

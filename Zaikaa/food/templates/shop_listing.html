@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Shop</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/shop_listing.css' %}" />
+    <script src="{% static 'js/shop_listing.js' %}" defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Add Shop</h1>
+
+        <form id="addShopForm" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="shopName">Shop Name</label>
+                <input type="text" id="shopName" name="shop_name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="shopPasskey">Passkey</label>
+                <input type="text" id="shopPasskey" name="passkey" required>
+            </div>
+
+            <h2>Menu Items</h2>
+            <div id="menuItemsContainer">
+                <div class="form-group">
+                    <input type="text" name="item_name[]" placeholder="Item Name" required>
+                    <input type="number" name="item_price[]" placeholder="Price" required>
+                </div>
+            </div>
+            <button type="button" class="add-item" onclick="addMenuItem()">Add Item</button>
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+</html>

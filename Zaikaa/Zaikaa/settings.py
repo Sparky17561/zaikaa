@@ -65,6 +65,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.static',  # Add this line
+
             ],
         },
     },
@@ -76,14 +78,25 @@ WSGI_APPLICATION = 'Zaikaa.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'zaikaa',
+#         'USER': 'root',
+#         'PASSWORD': 'abc123',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'zaikaa',
-        'USER': 'root',
-        'PASSWORD': 'abc123',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'zaikaa',  # Replace with your database name
+        'USER': 'postgres',  # Replace with your database username
+        'PASSWORD': 'abc123',  # Replace with your database password
+        'HOST': 'localhost',  # Use the appropriate host (default is localhost)
+        'PORT': '5432',  # Default PostgreSQL port
     }
 }
 
@@ -133,5 +146,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 
-# settings.py
-LOGIN_REDIRECT_URL = '/food/login/'  # or wherever you want to redirect users
+
+
+STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [
+    BASE_DIR / "food/static",  # Pointing to the correct folder inside the food app
+]
+
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # The directory where static files will be collected

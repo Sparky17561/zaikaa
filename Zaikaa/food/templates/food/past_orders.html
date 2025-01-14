@@ -108,6 +108,21 @@
             text-align: center;
             margin-top: 20px;
         }
+
+        .button {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #28a745;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        margin-top: 20px;
+    }
+
+    .button:hover {
+        background-color: #218838;
+    }
     </style>
 </head>
 <body>
@@ -116,7 +131,10 @@
     <p><strong>Email:</strong> {{ user_email }}</p>
     <p><strong>Name:</strong> {{ user_name }}</p>
     <p><strong>Phone:</strong> {{ user_phone }}</p>
-
+        <!-- Add this inside the body where you want the button to appear -->
+    <a href="{% url 'home' %}" id="go-home-btn" class="button">
+        Go to Home Page
+    </a>
     <button id="fetch-orders-btn">Fetch Orders</button>
     <div id="loading" class="loading">Loading...</div>
     <div id="orders"></div>

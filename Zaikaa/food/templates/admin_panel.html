@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/admin_panel.css' %}" />
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Panel</h1>
+
+        <div class="button-wrapper">
+            <div class="buttons">
+                <!-- Add Shop Button -->
+                <form action="{% url 'shop_listing' %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" id="add-shop-button">Add Shop</button>
+                </form>
+
+                <!-- Show Pending Orders Button -->
+                <button id="show-pending-orders-button">Show Pending Orders</button>
+
+                <!-- Show All Orders Button -->
+                <button id="show-all-orders-button">Show All Orders</button>
+
+                <!-- Logout Button -->
+                <form action="{% url 'admin_logout' %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" id="logout-button">Logout</button>
+                </form>
+            </div>
+        </div>
+
+        {% if shops %}
+            {% for shop_id, shop in shops.items %}
+            <div class="shop">
+                <h3>{{ shop.shop_name }}</h3>
+                <div class="shop-buttons">
+                    <!-- Delete Shop Button -->
+                    <button onclick="deleteShop('{{ shop_id }}')">Delete Shop</button>
+                </div>
+                <div class="shop-items">
+                    {% if shop.items %}
+                        {% for item in shop.items %}
+                        <p id="availability-{{ item.id }}">
+                            {{ item.name }} - ₹{{ item.price }} (Availability: 
+                            {% if item.availability == 1 %}
+                                Available
+                            {% else %}
+                                Not Available
+                            {% endif %})
+                            <form action="{% url 'toggle_availability' item.id %}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit">
+                                    {% if item.availability == 1 %}
+                                        Mark Unavailable
+                                    {% else %}
+                                        Mark Available
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </p>
+                        {% endfor %}
+                    {% else %}
+                        <p>No menu items found for this shop.</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No shops found.</p>
+        {% endif %}
+    </div>
+    <script>
+        // <!-- JavaScript for handling navigation and shop deletion -->
+// Get CSRF token from the DOM
+const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+
+document
+  .getElementById("show-pending-orders-button")
+  .addEventListener("click", function () {
+    window.location.href = "{% url 'adminapproval' %}";
+  });
+
+// Function to delete shop
+function deleteShop(shopId) {
+  if (
+    confirm("Are you sure you want to delete this shop and all its menu items?")
+  ) {
+    fetch(`/food/admin/delete_shop/${shopId}/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrfToken, // Include CSRF token
+      },
+      body: JSON.stringify({ shop_id: shopId }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        alert(data.message);
+        location.reload();
+      })
+      .catch((error) => console.error("Error:", error));
+  }
+}
+
+document
+  .getElementById("show-all-orders-button")
+  .addEventListener("click", function () {
+    window.location.href = "{% url 'allorders' %}";
+  });
+
+      </script>
+</body>
+</html>
