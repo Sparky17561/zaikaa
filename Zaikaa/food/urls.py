@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import  home , confirm_order, settinguporder, check_order_status, success, waiting, adminapproval, allorders, approve_order, past_orders_page, past_orders, stall_login, bookings, update_order_status, admin_login, admin_panel , admin_logout, add_shop, delete_shop, shop_listing, toggle_availability
+from .views import  home , confirm_order, settinguporder, check_order_status, success, waiting, adminapproval, allorders, approve_order, payment_success_view, past_orders_page, past_orders, stall_login, bookings, update_order_status, admin_login, admin_panel , admin_logout, add_shop, delete_shop, shop_listing, toggle_availability, generate_order_id
 
 
 urlpatterns = [
@@ -25,6 +25,7 @@ urlpatterns = [
     path('admin/delete_shop/<int:shop_id>/', delete_shop, name='delete_shop'),
     path('admin/shop_listing/', shop_listing, name='shop_listing'),
     path('admin/toggle_availability/<int:item_id>/', toggle_availability, name='toggle_availability'),
-
+    path('pay_online/', generate_order_id, name='generate_order_id'),
+    path('payment-success/', payment_success_view, name='payment-success'),
 
 ]

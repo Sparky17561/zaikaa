@@ -3,57 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Food Shops</title>
-    <style>
-        .shop {
-            margin-bottom: 20px;
-        }
-        .shop-name {
-            font-weight: bold;
-            font-size: 20px;
-        }
-        .item {
-            margin-left: 20px;
-        }
-    </style>
+    <title>Landing Page</title>
 </head>
 <body>
-    <div id="shops-container"></div>
-
-    <script>
-        // Fetch data from the Django API endpoint
-        fetch('/food/api/get-shops-and-items/')
-            .then(response => response.json())
-            .then(data => {
-                // Get the container to display the shops
-                const container = document.getElementById('shops-container');
-                
-                // Loop through each shop
-                for (let shopName in data) {
-                    // Create a new shop section
-                    const shopDiv = document.createElement('div');
-                    shopDiv.classList.add('shop');
-
-                    // Create shop name header
-                    const shopHeader = document.createElement('div');
-                    shopHeader.classList.add('shop-name');
-                    shopHeader.textContent = shopName;
-                    shopDiv.appendChild(shopHeader);
-
-                    // Loop through each item in the shop
-                    const items = data[shopName];
-                    items.forEach(item => {
-                        const itemDiv = document.createElement('div');
-                        itemDiv.classList.add('item');
-                        itemDiv.textContent = `${item.item_name} - Rs${item.price} - ${item.availability}`;
-                        shopDiv.appendChild(itemDiv);
-                    });
-
-                    // Append the shop to the container
-                    container.appendChild(shopDiv);
-                }
-            })
-            .catch(error => console.error('Error fetching data:', error));
-    </script>
+    <h1>Landing Page</h1>
 </body>
 </html>

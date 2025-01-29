@@ -1,126 +1,158 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Confirmation - Food Fiesta</title>
-    <link rel="stylesheet" href="{% static 'css/confirm_order.css' %}">
-    <link
-      href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css"
-      rel="stylesheet"
-    />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <title>Confirm Order</title>
+    <style>
+        /* Add your existing CSS styles here */
+
+        .order-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .form-field {
+            margin-bottom: 15px;
+        }
+
+        .form-field input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        #selected-items {
+            margin-bottom: 20px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .item-name {
+            font-weight: bold;
+        }
+
+        .item-price {
+            color: #333;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+        }
+
+        .quantity-input {
+            width: 50px;
+            text-align: center;
+            margin: 0 5px;
+        }
+
+        .pay-button, .back-home-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .pay-button:hover, .back-home-button:hover {
+            background-color: #218838;
+        }
+
+        .pay-button:disabled {
+            background-color: #ccc;
+        }
+    </style>
 </head>
 <body>
-    <div class="app">
-        <!-- Navbar -->
-             
-    <nav>
-        <h2>ECell</h3>
-        <h2>Food Fiesta</h3>
-        <div class="nav-part2">
-          
-          <details>
-            <summary>
-              <i class="ri-menu-fold-fill"></i>
-            </summary>
-            <ul>
-              <li ><i class="ri-restaurant-line"><a  href="{% url 'home' %}">Menu Page</a></i></li>
-              <li ><i class="ri-shopping-bag-2-line"><a class="nav-link" href="{% url 'past_orders_page'%}">Past Orders</a></i></li>
-            </ul>
-          </details>
-            
+
+    <div class="order-container">
+        <h1>Confirm Your Order</h1>
+        
+        <!-- User Information -->
+        <div>
+            <h2>User Information</h2>
+            <div class="form-field">
+                <input type="text" id="name" placeholder="Enter your name" value="{{ user_name }}" disabled>
+            </div>
+            <div class="form-field">
+                <input type="email" id="email" placeholder="Enter your email" value="{{ user_email }}" disabled>
+            </div>
+            <div class="form-field">
+                <input type="text" id="phone" placeholder="Enter your mobile number" value="{{ user_phone }}" disabled>
+            </div>
         </div>
-      </nav>
 
-        <!-- Main Content -->
-        <main class="main">
-            <div class="container">
-                <!-- Confirmation Header -->
-                <div class="header">
-                    <h1>Order Confirmation</h1>
-                    <p>Thank you for ordering at Food Fiesta! Please review your order details below.</p>
-                </div>
+        <div id="selected-items">
+            <h2>Order Confirmation</h2>
+            <ul id="order-list">
+                {% for item in selected_items %}
+                    <li class="order-item" data-item-id="{{ forloop.counter }}">
+                        <div>
+                            <div class="item-name">{{ item.item_name }} (Shop ID: {{ item.shop_id }})</div>
+                            <div class="item-price">₹{{ item.price }}</div>
+                        </div>
+                        <div class="quantity-controls">
+                            <button type="button" class="decrease" data-item="{{ forloop.counter }}">-</button>
+                            <input type="number" class="quantity-input" data-item="{{ forloop.counter }}" value="1" min="1" disabled>
+                            <button type="button" class="increase" data-item="{{ forloop.counter }}">+</button>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
 
-                <!-- User Details Form -->
-                <form id="order-form" method="POST" action="{% url 'settinguporder' %}">
-                    {% csrf_token %}
-                    <div class="user-details-form">
-                        <h2>Your Details</h2>
-                        <div class="form-group">
-                            <label for="name">Name</label>
-                            <input type="text" id="name" name="name" placeholder="Enter your name" value="{{ user_name }}" required>
-                            <span class="error-message" id="name-error"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" name="email" placeholder="Enter your SAKEC email" value="{{ user_email }}" required>
-                            <span class="error-message" id="email-error"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="phone">Phone Number</label>
-                            <input type="tel" id="phone" name="phone" placeholder="Enter 10-digit phone number" value="{{ user_phone }}" required>
-                            <span class="error-message" id="phone-error"></span>
-                        </div>
-                    </div>
+            <div class="total">Total: ₹<span id="total-price">0</span></div>
+        </div>
 
-                    <!-- Order Details -->
-                    <div class="order-details" id="orderDetails">
-                        <h2>Order Confirmation</h2>
-                        <ul>
-                            {% for item in selected_items %}
-                                <li class="order-item" data-item-id="{{ forloop.counter }}">
-                                    <div>
-                                        <div class="item-name">{{ item.item_name }}</div>
-                                        <div class="item-price">₹{{ item.price }}</div>
-                                    </div>
-                                    <div class="quantity-controls">
-                                        <button type="button" class="quantity-btn decrease" data-item="{{ forloop.counter }}">-</button>
-                                        <input type="number" class="quantity-input" data-item="{{ forloop.counter }}" value="1" min="1">
-                                        <button type="button" class="quantity-btn increase" data-item="{{ forloop.counter }}">+</button>
-                                    </div>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                        <div class="total-section">
-                            <span>Total Amount: ₹<span id="total-price">0</span></span>
-                            <input type="hidden" name="total" id="total-input">
-                            <input type="hidden" name="order_items" id="order-items-input">
-                        </div>
-                        <button type="submit" class="payment-btn" id="pay-cash">Pay by Cash</button>
-                        <!-- <button type="button" class="payment-btn" id="pay-online">Pay Online</button> -->
-                    </div>
-                </form>
-            </div>
-        </main>
+        <!-- Pay Online Button -->
+        <form action="{% url 'generate_order_id' %}" method="POST" id="online-payment-form">
+            {% csrf_token %}
+            <button type="submit" class="pay-button" id="pay-online">Pay Online</button>
+        </form>
 
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="container">
-                <div class="footer-content">
-                    <div class="footer-section">
-                        <h4>Contact Us</h4>
-                        <p><i data-lucide="mail"></i> foodfiesta@sakec.ac.in</p>
-                        <p><i data-lucide="phone"></i> +91 98765 43210</p>
-                    </div>
-                    <div class="footer-section">
-                        <h4>Follow Us</h4>
-                        <div class="social-links">
-                            <a href="#"><i data-lucide="instagram"></i></a>
-                            <a href="#"><i data-lucide="twitter"></i></a>
-                            <a href="#"><i data-lucide="facebook"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="footer-bottom">
-                    <p>© 2024 Food Fiesta - E-CELL SAKEC. All rights reserved.</p>
-                </div>
-            </div>
-        </footer>
+        <button class="back-home-button" onclick="window.location.href='/food/'">Go Back to Home</button>
     </div>
-    <script src="{% static 'js/confirm_order.js' %}"></script>
+
+    <script>
+        // Update price function
+        function updatePrice() {
+            let total = 0;
+            document.querySelectorAll('.order-item').forEach(item => {
+                const price = parseFloat(item.querySelector('.item-price').textContent.replace('₹', ''));
+                const quantity = parseInt(item.querySelector('.quantity-input').value);
+                total += price * quantity;
+            });
+            document.getElementById('total-price').textContent = total.toFixed(2);
+        }
+
+        // Trigger price update on quantity change
+        document.querySelectorAll('.increase, .decrease').forEach(button => {
+            button.addEventListener('click', function () {
+                const input = this.parentElement.querySelector('.quantity-input');
+                input.value = this.classList.contains('increase') ? parseInt(input.value) + 1 : Math.max(1, parseInt(input.value) - 1);
+                updatePrice();
+            });
+        });
+
+        // Initial price update
+        updatePrice();
+    </script>
+
 </body>
 </html>

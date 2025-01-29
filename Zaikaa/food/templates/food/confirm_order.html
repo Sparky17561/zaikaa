@@ -138,11 +138,23 @@
                 <input type="hidden" name="order_items" id="order-items-input">
 
                 <button type="submit" class="pay-button" id="pay-cash">Pay by Cash</button>
-                <button type="submit" class="pay-button" id="pay-online">Pay Online</button>
+                
             </div>
 
-            <button class="back-home-button" onclick="window.location.href='/food/'">Go Back to Home</button>
         </form>
+
+        <!-- Pay Online Form -->
+        <form action="{% url 'generate_order_id' %}" method="POST" id="online-payment-form">
+            {% csrf_token %}
+            <!-- Hidden fields for order items and total amount -->
+            <input type="hidden" name="order_items" id="online-order-items-input">
+            <input type="hidden" name="total" id="online-total-input">
+            
+            <button type="submit" class="pay-button" id="pay-online">Pay Online</button>
+        </form>
+
+        <button class="back-home-button" onclick="window.location.href='/food/'">Go Back to Home</button>
+
     </div>
 
     <script>
@@ -182,7 +194,7 @@
             document.getElementById('total-input').value = total.toFixed(2);  // Update hidden input field
         }
 
-        // Event listener for form submission
+        // Event listener for form submission (Pay by Cash)
         document.getElementById('order-form').addEventListener('submit', function(event) {
             // Collect order items
             const orderItems = collectOrderItems();
@@ -192,6 +204,27 @@
 
             // Optionally, you can log or debug the items
             console.log(orderItems);
+        });
+
+        // Event listener for form submission (Pay Online)
+        document.getElementById('online-payment-form').addEventListener('submit', function(event) {
+            // Collect order items for Pay Online
+            const orderItems = collectOrderItems();
+            
+            // Store order items in the hidden input field as a JSON string
+            document.getElementById('online-order-items-input').value = JSON.stringify(orderItems);
+
+            // Calculate total for Pay Online and store it in the hidden input field
+            let total = 0;
+            orderItems.forEach(item => {
+                total += parseFloat(item.total_price);
+            });
+            document.getElementById('online-total-input').value = total.toFixed(2);
+            let x = document.getElementById('online-total-input').value
+            
+            // Optionally, you can log or debug the items
+            console.log(orderItems);
+            console.log('Total:', total.toFixed(2));
         });
 
         // Update quantity and price dynamically

@@ -1,3 +1,10 @@
+::-webkit-scrollbar {
+  display: none;
+}
+
+html:focus-within {
+  scroll-behavior: smooth;
+}
 
 body {
   font-family: 'Roboto', sans-serif;
@@ -5,11 +12,17 @@ body {
   margin: 0;
   padding: 0;
   color: #4a4a4a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  margin-top:7vh;
 }
 
 .shop-container {
-  max-width: 800px;
-  margin: 50px auto;
+  max-width: 1000px;
+  margin: 8vh auto 50px;
   padding: 30px;
   background-color: #fff;
   border-radius: 12px;
@@ -90,7 +103,7 @@ button {
   cursor: pointer;
   font-size: 18px;
   font-weight: bold;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 button:hover {
@@ -104,4 +117,72 @@ button:hover {
 .user-info label {
   font-size: 16px;
   font-weight: bold;
+}
+
+
+nav {
+  width: 95vw;
+  height: 9vh;
+  background-color: #d03941;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  z-index: 99;
+  top: 0px;
+  padding: 0 5vw;
+  border-bottom: 1px solid #000;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+nav h2 {
+  font-size: 2rem;
+}
+
+.nav-part2 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+}
+
+.nav-part2 details {
+  position: relative;
+}
+.nav-part2 details summary {
+  list-style: none;
+}
+.nav-part2 details ul {
+  overflow: hidden;
+  background-color: white;
+  color: #000;
+  position: absolute;
+  right: 0%;
+  top: 40px;
+  width: max-content;
+  border-radius: 10px;
+  box-shadow: 0 0.2em 0.2rem rgba(0, 0, 0, 0.5);
+  text-shadow: none;
+  padding: 5px 5px;
+}
+.nav-part2 details ul li {
+  font-size: 1.5rem;
+  padding: 6px 6px;
+  cursor: pointer;
+  text-shadow: none;
+  border-radius: 5px 5px 0 0;
+  border-bottom: 1px solid #3f171725;
+}
+.nav-part2 details ul li:last-child {
+  border-bottom: none;
+  border-radius: 0px 0px 5px 5px;
+}
+
+.nav-part2 details ul li:hover {
+  background-color: #59ae9234;
+}
+.nav-part2 details ul li i a {
+  text-decoration: none;
+  color: #000;
 }

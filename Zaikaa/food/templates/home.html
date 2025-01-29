@@ -44,7 +44,7 @@
                       <label>
                         <!-- Manually create the JSON string in the value field -->
                         <input type="checkbox" name="selected_items" value='{"item_id": {{ item.item_id }}, "item_name": "{{ item.item_name }}", "price": "{{ item.price }}", "availability": "{{ item.availability }}", "shop_id": {{ item.shop_id }} }'>
-                        {{ item.item_name }} - ${{ item.price }}
+                        {{ item.item_name }} - &#8377;{{ item.price }}
                       </label>
                     </li>
                   {% endfor %}

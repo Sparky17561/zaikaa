@@ -126,32 +126,41 @@ from django.http import HttpResponse
 
 # Set up logging
 logger = logging.getLogger(__name__)
+import json
 
 def settinguporder(request):
     # Get form data (from the form submitted)
     user_name = request.POST.get('name')
     user_email = request.POST.get('email')
     mobile = request.POST.get('mobile')
-    
+
     # Update session with the new user details
     request.session['user_name'] = user_name
     request.session['user_email'] = user_email
     request.session['user_mobile'] = mobile
-    # Print all keys in the session
-    print(f"Session keys: {list(request.session.keys())}")
 
-    # Print the entire session dictionary
+    # Log session data for debugging
+    print(f"Session keys: {list(request.session.keys())}")
     print(f"Full session data: {dict(request.session)}")
 
     # Get selected items from session
     selected_items = request.session.get('selected_items', [])
-    
+
     # Extract shop IDs from selected items (ensure no duplicates)
     shop_ids = list(set(item['shop_id'] for item in selected_items))
-    
+
+    # Get total amount and order items
     total_amount = float(request.POST.get('total'))  # Get the total amount from the form
-    items = json.loads(request.POST.get('order_items'))  # Get a list of items from the form
     
+    order_items_str = request.POST.get('order_items')
+    print(f"Order Items (raw): {order_items_str}")  # Log the raw order items data
+
+    try:
+        items = json.loads(order_items_str)  # Get a list of items from the form
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON for order_items: {e}")
+        return HttpResponse("Invalid order items data", status=400)
+
     # Print the data for debugging
     print(f"User Name: {user_name}")
     print(f"User Email: {user_email}")
@@ -759,3 +768,261 @@ def toggle_availability(request, item_id):
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request."})
+
+
+
+def landing_page(request):
+    return render(request, 'index.html')
+
+
+
+
+
+from django.shortcuts import redirect
+
+import razorpay
+import json
+import random
+import re
+from datetime import datetime
+from django.http import HttpResponse
+from django.shortcuts import redirect
+from django.db import connection, transaction
+from django.conf import settings
+
+import json
+import re
+import random
+from datetime import datetime
+from django.db import connection, transaction
+from django.http import HttpResponse
+from django.shortcuts import redirect
+import razorpay
+from django.conf import settings
+
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+import json
+import re
+from django.db import connection, transaction
+import razorpay
+from datetime import datetime
+import random
+
+from django.shortcuts import redirect
+import razorpay
+import random
+import re
+import logging
+from datetime import datetime
+from django.db import connection, transaction
+from django.shortcuts import redirect
+from django.http import JsonResponse
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+
+import re
+
+def payment_success_view(request):
+    if request.method == 'GET':
+        logging.debug("Received GET request for payment success.")
+        
+        payment_id = request.GET.get('payment_id')
+        order_id = request.GET.get('order_id')
+
+        if payment_id and order_id:
+            try:
+                # Fetch user details from session
+                user_name = request.session.get('user_name')
+                user_email = request.session.get('user_email')
+                mobile = request.session.get('user_phone')
+
+                logging.debug(f"Session Data: user_name={user_name}, user_email={user_email}, mobile={mobile}")
+
+                # Check if session data exists
+                if not all([user_name, user_email, mobile]):
+                    return JsonResponse({'success': False, 'message': "Session data missing."})
+
+                # Initialize Razorpay client
+                client = razorpay.Client(auth=("rzp_test_x6EYO4W3NIqb6X", "XyLCQKkNiM9Mf5DIzRwReFEg"))
+
+                # Verify payment with Razorpay
+                payment = client.payment.fetch(payment_id)
+                logging.debug(f"Fetched payment details: {payment}")
+
+                if payment['status'] == 'captured':
+                    logging.debug("Payment captured successfully.")
+
+                    # Retrieve cart items
+                    selected_items = request.session.get('selected_items', [])
+                    if not selected_items:
+                        return JsonResponse({'success': False, 'message': "No items in the session."})
+                    
+                    logging.debug(f"Selected Items: {selected_items}")
+
+                    try:
+                        with transaction.atomic():
+                            logging.debug("Transaction started.")
+
+                            # Query 1: Insert user into `users` table if not exists
+                            with connection.cursor() as cursor:
+                                cursor.execute(""" 
+                                    SELECT "user_id" FROM "users" WHERE "mobile" = %s OR "email" = %s;
+                                """, [mobile, user_email])
+                                result = cursor.fetchone()
+
+                                if result:
+                                    user_id = result[0]
+                                    logging.debug(f"User exists: user_id={user_id}")
+                                else:
+                                    cursor.execute(""" 
+                                        INSERT INTO "users" ("name", "email", "mobile")
+                                        VALUES (%s, %s, %s) RETURNING "user_id";
+                                    """, [user_name, user_email, mobile])
+                                    user_id = cursor.fetchone()[0]
+                                    logging.debug(f"Inserted new user: user_id={user_id}")
+
+                            # Query 2: Check availability and insert order into `orderlist`
+                            with connection.cursor() as cursor:
+                                for item in selected_items:
+                                    item_name = item['item_name']
+                                    quantity = item['quantity']
+                                    price = float(item['price'])
+
+                                    # Extract shop_id from item_name using regex
+                                    match = re.match(r'^(.*?) \(Shop ID: (\d+)\)$', item_name)
+                                    item_name_without_shop = match.group(1) if match else item_name
+                                    shop_id = match.group(2) if match else None
+
+                                    if not shop_id:
+                                        raise Exception(f"Shop ID not found in item: {item_name}")
+
+                                    logging.debug(f"Extracted Shop ID: {shop_id}, Item Name: {item_name_without_shop}")
+
+                                    cursor.execute(""" 
+                                        SELECT "availability" FROM "menuitems" WHERE "shop_id" = %s AND "name" = %s;
+                                    """, [shop_id, item_name_without_shop])
+                                    result = cursor.fetchone()
+
+                                    if result:
+                                        availability = result[0]
+                                        if availability == 1:
+                                            total_price = quantity * price
+                                            cursor.execute(""" 
+                                                INSERT INTO "orderlist" ("email", "name", "contact_no", "shop_id", "item_name", "qty", "total_amt", "status")
+                                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
+                                            """, [user_email, user_name, mobile, shop_id, item_name_without_shop, quantity, total_price, 'Pending'])
+                                            logging.debug(f"Inserted order for {item_name_without_shop} at shop_id={shop_id}")
+                                        else:
+                                            raise Exception(f"The item '{item_name_without_shop}' is unavailable at Shop ID {shop_id}.")
+                                    else:
+                                        raise Exception(f"The item '{item_name_without_shop}' was not found in the menu at Shop ID {shop_id}.")
+
+                            # Generate token ID and timestamp
+                            token_id = random.randint(1000, 9999)
+                            timestamp = datetime.now()
+                            logging.debug(f"Generated token_id={token_id}, timestamp={timestamp}")
+
+                            # Update orders with token ID and payment mode
+                            with connection.cursor() as cursor:
+                                cursor.execute(""" 
+                                    UPDATE "orderlist" 
+                                    SET "tokenid" = %s, "timestamp" = %s, "mode_of_payment" = 'Online'
+                                    WHERE "email" = %s AND "status" = 'Pending' AND "tokenid" IS NULL;
+                                """, [token_id, timestamp, user_email])
+                                logging.debug("Updated orderlist with token ID and timestamp.")
+
+                            # Update order status to 'Approved'
+                            with connection.cursor() as cursor:
+                                cursor.execute(""" 
+                                    UPDATE "orderlist" 
+                                    SET "status" = 'Approved'
+                                    WHERE "email" = %s AND "status" = 'Pending' AND "tokenid" = %s;
+                                """, [user_email, token_id])
+                                logging.debug("Updated orderlist status to 'Approved'.")
+
+                            logging.debug("Transaction committed successfully.")
+                            return redirect('success', token_id=token_id)
+
+                    except Exception as e:
+                        logging.error(f"Database transaction failed: {str(e)}")
+                        return JsonResponse({'success': False, 'message': f"Error occurred: {str(e)}"})
+                else:
+                    logging.debug("Payment status is not captured.")
+                    return JsonResponse({'success': False, 'message': "Payment failed or not captured."})
+
+            except Exception as e:
+                logging.error(f"Payment verification failed: {str(e)}")
+                return JsonResponse({'success': False, 'message': f"Payment verification failed: {str(e)}"})
+        else:
+            logging.debug("Missing payment_id or order_id.")
+            return JsonResponse({'success': False, 'message': 'Invalid payment or order details.'})
+
+    logging.debug("Invalid request method.")
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+
+
+
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import razorpay
+import uuid
+
+from django.shortcuts import render
+import razorpay
+import uuid
+
+import uuid
+import razorpay
+def generate_order_id(request):
+    # Fetching user details from session
+    user_details = {
+        'name': request.session.get('user_name'),
+        'email': request.session.get('user_email'),
+        'phone': request.session.get('user_phone')
+    }
+    
+    # Fetching selected items from the form data (submitted as JSON string)
+    selected_items = request.POST.get('order_items', '[]')  # Get the JSON string of items
+    selected_items = json.loads(selected_items)  # Convert the JSON string back to a Python object
+
+    print("Before updating quantities:", selected_items)  # Debugging line
+
+    # Update total_price based on quantity
+    for item in selected_items:
+        item_quantity = item['quantity']  # Ensure 'quantity' is present
+        print(f"Item quantity: {item_quantity}")  # Debugging line
+        item['total_price'] = float(item['price']) * item_quantity  # Update total price
+
+    print("After updating quantities:", selected_items)  # Debugging line
+
+    # Recalculate total amount
+    total_amount = sum(item['total_price'] for item in selected_items)
+    
+    # Store updated items in session
+    request.session['selected_items'] = selected_items  
+    request.session.modified = True  # Ensure session updates
+
+    # Razorpay order creation logic
+    client = razorpay.Client(auth=("rzp_test_x6EYO4W3NIqb6X", "XyLCQKkNiM9Mf5DIzRwReFEg"))
+    razorpay_order = client.order.create(dict(
+        amount=int(total_amount * 100),  # amount in paise
+        currency='INR',
+        receipt=str(uuid.uuid4())
+    ))
+
+    # Storing the Razorpay order ID in the session
+    request.session['razorpay_order_id'] = razorpay_order['id']
+
+    # Returning the response with updated data
+    context = {
+        'user_details': user_details,
+        'selected_items': selected_items,
+        'total_amount': total_amount,
+        'razorpay_order_id': razorpay_order['id'],
+    }
+    print(context)
+    return render(request, 'pay_online.html', context)

@@ -156,3 +156,8 @@ STATICFILES_DIRS = [
 
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # The directory where static files will be collected
+
+
+# Razorpay credentials
+RAZORPAY_KEY_ID = 'rzp_test_x6EYO4W3NIqb6X'
+RAZORPAY_SECRET_KEY = 'XyLCQKkNiM9Mf5DIzRwReFEg'
