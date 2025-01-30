@@ -112,7 +112,7 @@
             "order_id": order_id,  // Order ID generated from backend
             "handler": function (response) {
                 // Handle successful payment here
-                alert('Payment successful! Transaction ID: ' + response.razorpay_payment_id);
+                
 
                 // Redirect or trigger API call to complete the order
                 window.location.href = "/food/payment-success/?payment_id=" + response.razorpay_payment_id + "&order_id=" + order_id;

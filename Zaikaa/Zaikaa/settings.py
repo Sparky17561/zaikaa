@@ -143,7 +143,11 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+SESSION_COOKIE_AGE = 86400  # 1 day
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
 
 
 
@@ -161,3 +165,11 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'  # The directory where static files will 
 # Razorpay credentials
 RAZORPAY_KEY_ID = 'rzp_test_x6EYO4W3NIqb6X'
 RAZORPAY_SECRET_KEY = 'XyLCQKkNiM9Mf5DIzRwReFEg'
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "sai.tester24jan24@gmail.com"
+EMAIL_HOST_PASSWORD = "abooyogjpkqvlelf"
+EMAIL_USE_TLS = True

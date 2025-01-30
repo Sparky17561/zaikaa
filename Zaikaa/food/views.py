@@ -11,82 +11,86 @@ import re
 # Home view to display all stalls and handle item selection
 
 def home(request):
-    # Execute raw SQL query
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT 
-                s.shop_id, 
-                s.shop_name, 
-                m.id AS item_id, 
-                m.name AS item_name, 
-                m.price, 
-                'Available' AS availability
-            FROM 
-                shops s
-            LEFT JOIN 
-                menuitems m ON s.shop_id = m.shop_id
-            WHERE 
-                m.availability = 1  -- Availability column has 0 or 1
-            ORDER BY 
-                s.shop_name, m.name;
-        """)
+    if request.user.is_authenticated:
 
-        # Fetch all results
-        rows = cursor.fetchall()
+        # Execute raw SQL query
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    s.shop_id, 
+                    s.shop_name, 
+                    m.id AS item_id, 
+                    m.name AS item_name, 
+                    m.price, 
+                    'Available' AS availability
+                FROM 
+                    shops s
+                LEFT JOIN 
+                    menuitems m ON s.shop_id = m.shop_id
+                WHERE 
+                    m.availability = 1  -- Availability column has 0 or 1
+                ORDER BY 
+                    s.shop_name, m.name;
+            """)
 
-    # Format the results into a dictionary by shop
-    shops = {}
-    for row in rows:
-        shop_id = row[0]
-        shop_name = row[1]
-        item_id = row[2]
-        item_name = row[3]
-        price = row[4]
-        availability = row[5]
+            # Fetch all results
+            rows = cursor.fetchall()
 
-        if shop_name not in shops:
-            shops[shop_name] = {'shop_id': shop_id, 'items': []}
+        # Format the results into a dictionary by shop
+        shops = {}
+        for row in rows:
+            shop_id = row[0]
+            shop_name = row[1]
+            item_id = row[2]
+            item_name = row[3]
+            price = row[4]
+            availability = row[5]
 
-        # Add items to the respective shop
-        if item_name:  # Only add items if they exist
-            shops[shop_name]['items'].append({
-                'item_id': item_id,
-                'item_name': item_name,
-                'price': price,
-                'availability': availability,
-                'shop_id': shop_id
-            })
+            if shop_name not in shops:
+                shops[shop_name] = {'shop_id': shop_id, 'items': []}
 
-    # If the form is submitted, process selected items
-    if request.method == 'POST':
-        selected_items = request.POST.getlist('selected_items')
-        formatted_items = []
-        for item in selected_items:
-            # Parse the JSON string correctly
-            item_data = json.loads(item)
-            formatted_items.append({
-                'item_name': item_data['item_name'],
-                'price': float(item_data['price']),
-                'shop_id': int(item_data['shop_id']),
-            })
-        request.session.clear()
-        # Store formatted items in the session
-        request.session['selected_items'] = formatted_items
-        
-        # Store user details in session
-        request.session['user_name'] = request.POST.get('name')
-        request.session['user_email'] = request.POST.get('email')
-        request.session['user_phone'] = request.POST.get('phone')
-        # Print the entire session to see what is stored
-        print(f"Session keys: {list(request.session.keys())}")
+            # Add items to the respective shop
+            if item_name:  # Only add items if they exist
+                shops[shop_name]['items'].append({
+                    'item_id': item_id,
+                    'item_name': item_name,
+                    'price': price,
+                    'availability': availability,
+                    'shop_id': shop_id
+                })
 
-        # Print the entire session dictionary
-        print(f"Full session data: {dict(request.session)}")
-        # Redirect to confirmation page
-        return redirect('confirm_order')
+        # If the form is submitted, process selected items
+        if request.method == 'POST':
+            selected_items = request.POST.getlist('selected_items')
+            formatted_items = []
+            for item in selected_items:
+                # Parse the JSON string correctly
+                item_data = json.loads(item)
+                formatted_items.append({
+                    'item_name': item_data['item_name'],
+                    'price': float(item_data['price']),
+                    'shop_id': int(item_data['shop_id']),
+                })
+            # request.session.clear()
+            # Store formatted items in the session
+            request.session['selected_items'] = formatted_items
+            
+            # # Store user details in session
+            request.session['user_name'] = request.POST.get('name')
+            request.session['user_email'] = request.POST.get('email')
+            request.session['user_phone'] = request.POST.get('phone')
+            # Print the entire session to see what is stored
+            print(f"Session keys: {list(request.session.keys())}")
 
-    # Pass the data to the template
-    return render(request, 'home.html', {'shops': shops})
+            # Print the entire session dictionary
+            print(f"Full session data: {dict(request.session)}")
+            # Redirect to confirmation page
+            return redirect('confirm_order')
+
+        # Pass the data to the template
+        return render(request, 'home.html', {'shops': shops})
+    else:
+            return redirect('ulogin')
 
 
 
@@ -94,26 +98,25 @@ def home(request):
 
 
 def confirm_order(request):
-    # Retrieve the selected items from the session
-    selected_items = request.session.get('selected_items', [])
-    
-    # Retrieve user details from session
-    user_name = request.session.get('user_name')
-    user_email = request.session.get('user_email')
-    user_phone = request.session.get('user_phone')
+    if request.user.is_authenticated:
+        # Retrieve the selected items from the session
+        selected_items = request.session.get('selected_items', [])
+        user_name = request.session['user_name'] 
+        user_email = request.session['user_email'] 
+        user_phone = request.session['user_phone'] 
+        # If no items are selected, redirect to the home page
+        if not selected_items:
+            return redirect('home')
 
-    # If no items are selected, redirect to the home page
-    if not selected_items:
-        return redirect('home')
-
-    # Pass the selected items and user details to the template
-    return render(request, 'food/confirm_order.html', {
-        'selected_items': selected_items,
-        'user_name': user_name,
-        'user_email': user_email,
-        'user_phone': user_phone
-    })
-
+        # Pass the selected items and user details to the template
+        return render(request, 'food/confirm_order.html', {
+            'selected_items': selected_items,
+            'user_name' : user_name,
+            'user_email' : user_email,
+            'user_phone' : user_phone
+        })
+    else:
+        return redirect('ulogin')
 
 
 import json
@@ -132,7 +135,7 @@ def settinguporder(request):
     # Get form data (from the form submitted)
     user_name = request.POST.get('name')
     user_email = request.POST.get('email')
-    mobile = request.POST.get('mobile')
+    mobile = request.POST.get('phone')
 
     # Update session with the new user details
     request.session['user_name'] = user_name
@@ -262,17 +265,23 @@ from django.db import connection
 # Set up logging
 logger = logging.getLogger(__name__)
 
+import json
+from random import randint
+from datetime import datetime
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.db import connection
+
 @csrf_exempt
 def check_order_status(request):
     if request.method == "POST":
         try:
-            data = json.loads(request.body)  # Load JSON body
-            email = data.get('email')  # Get the email from the parsed JSON
+            data = json.loads(request.body)
+            email = data.get('email')
 
             if not email:
-                return JsonResponse({'error': 'Email not provided'}, status=400)
+                return JsonResponse({'status': 'error', 'message': 'Email not provided'}, status=400)
 
-            # Check the count of pending items
             with connection.cursor() as cursor:
                 cursor.execute("""
                     SELECT COUNT(*) 
@@ -285,10 +294,9 @@ def check_order_status(request):
                 return JsonResponse({
                     'status': 'pending',
                     'message': f'{pending_count} item(s) still pending approval',
-                    'pending_count': pending_count  # Include pending count in response
+                    'pending_count': pending_count
                 })
 
-            # Check if there are any approved items without a token ID
             with connection.cursor() as cursor:
                 cursor.execute("""
                     SELECT COUNT(*)
@@ -299,13 +307,12 @@ def check_order_status(request):
 
             if approved_count == 0:
                 return JsonResponse({
-                    'error': 'No approved items found for this email.',
                     'status': 'failed',
-                    'pending_count': pending_count  # Include pending count even in failure
+                    'message': 'No approved items found for this email.',
+                    'pending_count': pending_count
                 })
 
-            # All conditions met; generate token ID and timestamp
-            token_id = random.randint(1000, 9999)
+            token_id = randint(1000, 9999)
             timestamp = datetime.now()
 
             with connection.cursor() as cursor:
@@ -315,21 +322,21 @@ def check_order_status(request):
                     WHERE "email" = %s AND "status" = 'Approved' AND "tokenid" IS NULL;
                 """, [token_id, timestamp, email])
 
-            # Return success response
             return JsonResponse({
                 'status': 'success',
                 'message': 'Order approved',
                 'token_id': token_id,
                 'timestamp': timestamp.strftime("%Y-%m-%d %H:%M:%S"),
-                'pending_count': pending_count  # Include pending count in success
+                'pending_count': pending_count
             })
 
         except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
 
 
 
@@ -480,18 +487,25 @@ def past_orders(request):
 
 from django.shortcuts import render
 
-def past_orders_page(request):
-    # Assuming the user information is stored in the session
-    user_email = request.session.get('user_email')
-    user_name = request.session.get('user_name')
-    user_phone = request.session.get('user_phone')
+from django.shortcuts import render, redirect
 
-    # Pass the data to the template
-    return render(request, 'food/past_orders.html', {
-        'user_email': user_email,
-        'user_name': user_name,
-        'user_phone': user_phone
-    })
+def past_orders_page(request):
+    if request.user.is_authenticated:
+        # Get user data from session
+        user_email = request.session.get('user_email', '')
+        user_name = request.session.get('user_name', '')
+        user_phone = request.session.get('user_phone', '')
+
+        # Pass data to the template
+        return render(request, 'food/past_orders.html', {
+            'user_email': user_email,
+            'user_name': user_name,
+            'user_phone': user_phone
+        })
+    
+    # Ensure redirect always returns a response
+    return redirect('ulogin')
+
 
 
 
@@ -824,6 +838,15 @@ logging.basicConfig(level=logging.DEBUG)
 
 import re
 
+import logging
+from random import randint
+import razorpay
+import re
+from datetime import datetime
+from django.db import connection, transaction
+from django.http import JsonResponse
+from django.shortcuts import redirect
+
 def payment_success_view(request):
     if request.method == 'GET':
         logging.debug("Received GET request for payment success.")
@@ -919,8 +942,8 @@ def payment_success_view(request):
                                     else:
                                         raise Exception(f"The item '{item_name_without_shop}' was not found in the menu at Shop ID {shop_id}.")
 
-                            # Generate token ID and timestamp
-                            token_id = random.randint(1000, 9999)
+                            # ✅ **Fix: Generate token ID correctly**
+                            token_id = randint(1000, 9999)  # Ensure random module is not overridden
                             timestamp = datetime.now()
                             logging.debug(f"Generated token_id={token_id}, timestamp={timestamp}")
 
@@ -1026,3 +1049,128 @@ def generate_order_id(request):
     }
     print(context)
     return render(request, 'pay_online.html', context)
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from django.contrib.auth import login,logout,authenticate;
+from random import *
+from django.core.mail import send_mail
+from .models import Profile  # Assuming Profile model exists
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from random import choice
+
+def urnp(request):
+    # Check if the user is already authenticated
+    if request.user.is_authenticated:
+        return redirect("home")
+    else:
+        if request.method == "POST":
+            un = request.POST.get("un")
+            try:
+                # Check if the user exists in the database
+                usr = User.objects.get(username=un)
+                
+                # Generate a new secure password
+                pw = "".join(choice("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&") for _ in range(8))
+                usr.set_password(pw)  # Update the user's password
+                usr.save()  # Save the updated user
+                
+                # Send an email with the new password
+                subject = "Reset Password - Kamal Classes"
+                text = f"Your new password is - {pw}"
+                from_email = "sai.tester24jan24@gmail.com"
+                send_mail(subject, text, from_email, [un])
+                
+                # Redirect to login after successful reset
+                return redirect("ulogin")
+            except User.DoesNotExist:
+                # If the email does not exist in the database
+                msg = "Email not registered"
+                return render(request, "urnp.html", {"msg": msg})  # Render the reset password page with an error message
+        else:
+            return render(request, "urnp.html")  # Render the reset password page initially
+
+
+
+from django.contrib.auth import authenticate, login
+from django.shortcuts import render, redirect
+from django.core.mail import send_mail
+from django.contrib.auth.models import User
+from random import choice
+
+def ulogin(request):
+    if request.user.is_authenticated:
+        # Set session variable after successful login
+        request.session['is_authenticated'] = True
+        return redirect("home")
+    else:
+        if request.method == "POST":
+            un = request.POST.get("un")
+            pw = request.POST.get("pw")
+            usr = authenticate(username=un, password=pw)
+            
+            if usr:
+                login(request, usr)
+                # Set session variable after successful login
+                request.session['is_authenticated'] = True
+                return redirect("home")
+            else:
+                msg = "Invalid email or password"
+                return render(request, "ulogin.html", {"msg": msg})
+        else:
+            return render(request, "ulogin.html")
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from random import choice
+
+def usignup(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+    else:
+        if request.method == "POST":
+            username = request.POST.get("username")
+            phone = request.POST.get("phone")
+            un = request.POST.get("un")
+            
+            if User.objects.filter(username=un).exists():
+                msg = "Email already registered"
+                return render(request, "usignup.html", {"msg": msg})
+
+            # Generate password securely
+            pw = "".join(choice("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&") for _ in range(8))
+
+            # Create user
+            usr = User.objects.create_user(first_name=username, username=un, password=pw, email=un)
+            usr.save()
+
+            # Save phone number in Profile model
+            Profile.objects.create(user=usr, phone=phone)
+
+            # Send email with password
+            subject = "Welcome to Kamal Classes"
+            text = f"Your password is - {pw}"
+            from_email = "sai.tester24jan24@gmail.com"
+            send_mail(subject, text, from_email, [un])
+
+            return redirect("ulogin")
+        else:
+            return render(request, "usignup.html")
+
+	
+from django.contrib.auth import logout
+from django.shortcuts import redirect
+
+def ulogout(request):
+    # Clear the session when logging out
+    logout(request)
+    request.session.flush()  # This will clear the session
+    return redirect("ulogin")
+
+

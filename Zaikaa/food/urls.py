@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import  home , confirm_order, settinguporder, check_order_status, success, waiting, adminapproval, allorders, approve_order, payment_success_view, past_orders_page, past_orders, stall_login, bookings, update_order_status, admin_login, admin_panel , admin_logout, add_shop, delete_shop, shop_listing, toggle_availability, generate_order_id
+from .views import  home , confirm_order, settinguporder, check_order_status, success, waiting, adminapproval, allorders, approve_order, payment_success_view, past_orders_page, past_orders, stall_login, bookings, update_order_status, admin_login, admin_panel , admin_logout, add_shop, delete_shop, shop_listing, toggle_availability, generate_order_id, ulogin, usignup, urnp, ulogout
 
 
 urlpatterns = [
@@ -27,5 +27,10 @@ urlpatterns = [
     path('admin/toggle_availability/<int:item_id>/', toggle_availability, name='toggle_availability'),
     path('pay_online/', generate_order_id, name='generate_order_id'),
     path('payment-success/', payment_success_view, name='payment-success'),
+    path("ulogin/",ulogin,name="ulogin"),
+    path("usignup/",usignup,name="usignup"),
+    path("ulogout/",ulogout,name="ulogout"),    
+    path("urnp/",urnp,name="urnp"),
+
 
 ]

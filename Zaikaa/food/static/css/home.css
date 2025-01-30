@@ -65,16 +65,33 @@ h3 {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
+/* Hide checkboxes */
+input[type="checkbox"] {
+  display: none;
+}
+
+/* Style labels as buttons */
 .shops li label {
   font-size: 16px;
   color: #333;
   display: flex;
   align-items: center;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
 }
 
-.shops li input {
-  margin-right: 15px;
-  transform: scale(1.2);
+/* Selected item styling */
+.shops li label.selected {
+  background: black;
+  color: white;
+  transform: scale(1.05);
+}
+
+/* Smooth animation for selection */
+.shops li label:hover {
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 input[type="text"],
@@ -119,7 +136,6 @@ button:hover {
   font-weight: bold;
 }
 
-
 nav {
   width: 95vw;
   height: 9vh;
@@ -150,9 +166,11 @@ nav h2 {
 .nav-part2 details {
   position: relative;
 }
+
 .nav-part2 details summary {
   list-style: none;
 }
+
 .nav-part2 details ul {
   overflow: hidden;
   background-color: white;
@@ -166,6 +184,7 @@ nav h2 {
   text-shadow: none;
   padding: 5px 5px;
 }
+
 .nav-part2 details ul li {
   font-size: 1.5rem;
   padding: 6px 6px;
@@ -174,6 +193,7 @@ nav h2 {
   border-radius: 5px 5px 0 0;
   border-bottom: 1px solid #3f171725;
 }
+
 .nav-part2 details ul li:last-child {
   border-bottom: none;
   border-radius: 0px 0px 5px 5px;
@@ -182,7 +202,8 @@ nav h2 {
 .nav-part2 details ul li:hover {
   background-color: #59ae9234;
 }
+
 .nav-part2 details ul li i a {
   text-decoration: none;
-  color: #000;
+  color: #000;
 }

@@ -1,0 +1,36 @@
+<html>
+<head>
+	<title> Email Auth App by Pranav </title>
+	<style>
+		* { font-size:40px; font-family: Calibri,Arial; }
+		.nav { background-color:lightblue; }
+		.nav a { color:black; text-decoration:none; margin:40px; }
+	</style>
+</head>
+<body>
+<center>
+	<div class="nav">
+		{% if user.is_authenticated %}
+			<a href="{% url 'ulogout' %}"> Logout </a>
+		{% else %}
+			<a href="{% url 'ulogin' %}"> Login </a>
+			<a href="{% url 'usignup' %}"> SignUp </a>
+			<a href="{% url 'urnp' %}"> RequestNewPassword </a>
+		{% endif %}
+	</div>
+	<h1> Login Page </h1>
+	<form method="POST">
+	{% csrf_token %}
+	<input type="email" name="un" placeholder="enter email" required />
+	<br><br>
+	<input type="password" name="pw" placeholder="enter password" required />
+	<br><br>
+	<input type="submit" value="login" />
+	</form>
+	<h2> {{ msg }} </h2>
+</center>
+
+
+
+</body>
+</html>
