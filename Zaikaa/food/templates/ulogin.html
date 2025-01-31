@@ -1,4 +1,4 @@
-<html>
+<!-- <html>
 <head>
 	<title> Email Auth App by Pranav </title>
 	<style>
@@ -32,5 +32,44 @@
 
 
 
+</body>
+</html> -->
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Fiesta - Login</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/login.css' %}"
+    />
+</head>
+<body>
+    <img src="{% static 'img/e_cell_logo.png' %}" alt="E-Cell Logo" class="ecell-logo">
+    <div class="container">
+        <img src="{% static 'img/FF_logo.png' %}" alt="Food Fiesta Logo" class="logo">
+        <h2 style="color: #e65c00;">Food Fiesta Login</h2>
+        <form class="login-form" method="POST">
+			{% csrf_token %}
+            <div class="input-group">
+                <input type="email" name = 'un' id="email" required>
+                <label for="email">Email</label>
+            </div>
+            <div class="input-group">
+                <input type="password" name = 'pw' id="password" required>
+                <label for="password">Password</label>
+            </div>
+            <button type="submit" class="btn">Login</button>
+            <div class="options">
+                <a href="{% url 'urnp' %}" id="forgot-password">Forgot Password?</a>
+                <a href="{% url 'usignup' %}" id="signup">Sign Up</a>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

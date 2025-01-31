@@ -1075,7 +1075,7 @@ def urnp(request):
                 usr = User.objects.get(username=un)
                 
                 # Generate a new secure password
-                pw = "".join(choice("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&") for _ in range(8))
+                pw = "".join(choice("0123456789") for _ in range(6))
                 usr.set_password(pw)  # Update the user's password
                 usr.save()  # Save the updated user
                 
@@ -1144,7 +1144,7 @@ def usignup(request):
                 return render(request, "usignup.html", {"msg": msg})
 
             # Generate password securely
-            pw = "".join(choice("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&") for _ in range(8))
+            pw = "".join(choice("0123456789") for _ in range(6))
 
             # Create user
             usr = User.objects.create_user(first_name=username, username=un, password=pw, email=un)

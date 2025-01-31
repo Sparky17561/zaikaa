@@ -9,230 +9,29 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/home.css' %}" />
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
 </head>
-<style>
-  ::-webkit-scrollbar {
-    display: none;
-  }
-
-  html:focus-within {
-    scroll-behavior: smooth;
-  }
-
-  body {
-    font-family: 'Roboto', sans-serif;
-    background: linear-gradient(to right, #ffecd2, #fcb69f);
-    margin: 0;
-    padding: 0;
-    color: #4a4a4a;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100vw;
-    margin-top: 7vh;
-  }
-
-  .shop-container {
-    max-width: 1000px;
-    margin: 8vh auto 50px;
-    padding: 30px;
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-  }
-
-  h1 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 20px;
-    font-size: 36px;
-    font-weight: bold;
-  }
-
-  h3 {
-    color: #ff6f61;
-    margin-bottom: 15px;
-    font-size: 22px;
-  }
-
-  .shops ul {
-    list-style: none;
-    padding: 0;
-  }
-
- /* Add animation for the selected item */
-.shops li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  padding: 10px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.5s ease, transform 0.5s ease, color 0.5s ease, padding 0.5s ease;
-  cursor: pointer;
-}
-
-.shops li.selected {
-  background-color: black;
-  color: rgb(237, 56, 56);
-  transform: translateX(20px); /* Move the item from left to right */
-  padding-left: 30px; /* Slight padding shift */
-}
-
-input[type="checkbox"]:checked + label {
-  color: black;
-  transition: color 0.5s ease; /* Smooth text color transition */
-}
-
-input[type="checkbox"] {
-  display: none; /* Hide the checkbox */
-}
-
-/* Ensure label text color change */
-label {
-  transition: color 0.5s ease;
-}
-
-
-  .shops li:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  }
-
-  
-
-  /* Style the entire list item when selected */
-  .shops li.selected {
-    background: #050404;
-    color: white;
-    transform: scale(1.05);
-  }
-
-  input[type="text"],
-  input[type="email"] {
-    width: calc(100% - 20px);
-    padding: 12px;
-    margin: 10px 0;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-  }
-
-  input:focus {
-    outline: none;
-    border-color: #ff6f61;
-    box-shadow: 0 0 5px rgba(255, 111, 97, 0.6);
-  }
-
-  button {
-    width: 100%;
-    padding: 15px;
-    background: linear-gradient(to right, #ff6f61, #ff9068);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 18px;
-    font-weight: bold;
-    transition: all 0.3s ease;
-  }
-
-  button:hover {
-    background: linear-gradient(to right, #ff9068, #ff6f61);
-  }
-
-  .user-info {
-    margin-top: 30px;
-  }
-
-  .user-info label {
-    font-size: 16px;
-    font-weight: bold;
-  }
-
-  nav {
-    width: 95vw;
-    height: 9vh;
-    background-color: #d03941;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: fixed;
-    z-index: 99;
-    top: 0px;
-    padding: 0 5vw;
-    border-bottom: 1px solid #000;
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
-  }
-
-  nav h2 {
-    font-size: 2rem;
-  }
-
-  .nav-part2 {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2rem;
-  }
-
-  .nav-part2 details {
-    position: relative;
-  }
-
-  .nav-part2 details summary {
-    list-style: none;
-  }
-
-  .nav-part2 details ul {
-    overflow: hidden;
-    background-color: white;
-    color: #000;
-    position: absolute;
-    right: 0%;
-    top: 40px;
-    width: max-content;
-    border-radius: 10px;
-    box-shadow: 0 0.2em 0.2rem rgba(0, 0, 0, 0.5);
-    text-shadow: none;
-    padding: 5px 5px;
-  }
-
-  .nav-part2 details ul li {
-    font-size: 1.5rem;
-    padding: 6px 6px;
-    cursor: pointer;
-    text-shadow: none;
-    border-radius: 5px 5px 0 0;
-    border-bottom: 1px solid #3f171725;
-  }
-
-  .nav-part2 details ul li:last-child {
-    border-bottom: none;
-    border-radius: 0px 0px 5px 5px;
-  }
-
-  .nav-part2 details ul li:hover {
-    background-color: #59ae9234;
-  }
-
-</style>
 <body>
+
+    <div class="transition">
+        <div class="transition-row row-1">
+            <div class="block revealtext1">Zaikaa</div>
+        </div>
+        <div class="transition-row row-2">
+            <div class="block revealtext2">FF-25</div>
+        </div>
+    </div>  
+
     <nav>
-        <h2>ECell</h2>
-        <h2>Food Fiesta</h2>
+        <img src="{% static 'img/ecell-logo.png' %}" alt="ECell Logo" width="100" height="50">
+        <h2>Zaikaa</h2>
         <div class="nav-part2">
           <details>
             <summary>
-              <i class="ri-menu-fold-fill"></i>
+              <i class="ri-menu-fold-line"></i>
             </summary>
             <ul>
               <li><i class="ri-restaurant-line"><a href="{% url 'home' %}">Menu Page</a></i></li>
               <li><i class="ri-shopping-bag-2-line"><a class="nav-link" href="{% url 'past_orders_page'%}">Past Orders</a></i></li>
-              <li><a class="nav-link" href="{% url 'ulogout'%}">Logout</a></li>
+              <li><i class="ri-logout-box-r-line"><a class="nav-link" href="{% url 'ulogout'%}">Logout</a></i></li>
 
             </ul>
           </details>
@@ -243,25 +42,28 @@ label {
     
         <form method="POST">
             {% csrf_token %}
-            <div class="shops">
+             <div class="shops">
                 {% for shop_name, shop_info in shops.items %}
-                    <h3>{{ shop_name }}</h3>
-                    <ul>
-                        {% for item in shop_info.items %}
-                            <li>
-                                <label>
-                                    <!-- Properly formatted JSON string in the value field -->
-                                    <input type="checkbox" name="selected_items"
-                                        value='{"item_id": {{ item.item_id }}, "item_name": "{{ item.item_name|escapejs }}", "price": {{ item.price }}, "availability": "{{ item.availability }}", "shop_id": {{ item.shop_id }} }'>
-                                    {{ item.item_name }} - ${{ item.price }}
-                                </label>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                    <div class="shop-item">
+                        <h3 class="shop-name">
+                            {{ shop_name }}
+                            <span class="arrow ri-arrow-down-s-line"></span>
+                        </h3>
+                        <ul class="menu">
+                            {% for item in shop_info.items %}
+                                <li>
+                                    <label>
+                                        <input type="checkbox" name="selected_items" value='{"item_id": {{ item.item_id }}, "item_name": "{{ item.item_name }}", "price": "{{ item.price }}", "availability": "{{ item.availability }}", "shop_id": {{ item.shop_id }} }'>
+                                        {{ item.item_name }}  <div>₹{{ item.price }}</div>
+                                    </label>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 {% endfor %}
             </div>
     
-            <div class="user-info">
+            <div class="user-info" style="display: none;">
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" value="{{ user.email }}" required><br><br>
     
@@ -272,15 +74,85 @@ label {
                 <input type="text" name="phone" value="{{ user.profile.phone|default:'' }}" required>
             </div>
     
-            <button type="submit">Confirm Order</button>
+            <button class="liquid-button" type="submit">Confirm Order</button>
         </form>
     </div>
     
+    <!-- Popup Message -->
+<div id="popup-message" class="popup liquid-button">
+    <p>Please select at least one item before confirming your order.</p>
+    <button id="close-popup">OK</button>
+</div>
           
-
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.0/gsap.min.js"></script>
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
+
+
+   const ease = "power4.inOut";
+
+        // Page Load Animation (Hides Loader after Animation)
+        revealTransition().then(() => {
+            gsap.set(".block", { visibility: "hidden" });
+        });
+
+        // Click Navigation Animation
+        document.querySelectorAll("a").forEach((link) => {
+            link.addEventListener("click", (event) => {
+                event.preventDefault();
+                const href = link.getAttribute("href");
+
+                if (href && !href.startsWith("#") && href !== window.location.pathname) {
+                    animateTransition().then(() => {
+                        window.location.href = href;
+                    });
+                }
+            });
+        });
+
+        // Reveal Animation (Runs on Page Load)
+        function revealTransition() {
+            return new Promise((resolve) => {
+                gsap.to(".block", { scaleY: 1 });
+                gsap.to(".block", {
+                    scaleY: 0,
+                    duration: 1.5,
+                    ease: ease,
+                    onComplete: resolve
+                });
+            });
+        }
+
+        // Animate Loader when Navigating to a Different Page
+        function animateTransition() {
+            return new Promise((resolve) => {
+                gsap.set(".block", { visibility: "visible", scaleY: 0 });
+                gsap.to(".block", {
+                    scaleY: 1,
+                    duration: 1.5,
+                    ease: ease,
+                    onComplete: resolve
+                });
+            });
+        }
+
+
+
+
+
+
+
+  // Page load animations
+  gsap.fromTo('.shop-container', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, delay:1 });
+  gsap.fromTo('nav', { y: -10 }, { opacity: 1, y: 0, duration: 0.5, delay:1 });
+
+  // Animate shop items when the page loads
+  gsap.fromTo('.shop-item', { opacity: 0, y: 20 }, { opacity: 1, y: 0, stagger: 0.2, duration: 0.5, delay:1 });
+
+  // Stagger effect for shop names when page loads
+  gsap.fromTo('.shop-name', { opacity: 0, y: -20 }, { opacity: 1, y: 0, stagger: 0.2, duration: 0.5 , delay:1});
+
+  // Checkbox toggle functionality
   document.querySelectorAll(".shops li").forEach(item => {
     item.addEventListener("click", function () {
       const checkbox = this.querySelector("input[type='checkbox']");
@@ -288,8 +160,64 @@ label {
       this.classList.toggle("selected", checkbox.checked);
     });
   });
+
+  // Shop name click to show/hide menu with GSAP animation
+  document.querySelectorAll('.shop-name').forEach(function(shopName) {
+    shopName.addEventListener('click', function() {
+      const arrow = shopName.querySelector('.arrow');
+      const menu = shopName.nextElementSibling; // Corresponding <ul> element
+
+      menu.classList.toggle('show');
+      
+      if (menu.classList.contains('show')) {
+        gsap.fromTo(menu.querySelectorAll('li'), { opacity: 0, y: -20 }, { opacity: 1, y: 0, stagger: 0.1 });
+        arrow.style.transform = 'rotate(180deg)';
+      } else {
+        gsap.to(menu.querySelectorAll('li'), { opacity: 0, y: -20, stagger: 0.1 });
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    });
+  });
+
+  // Animate <ul> inside <details> when clicking <summary>
+  document.querySelector("details summary").addEventListener("click", function () {
+    const menu = this.parentElement.querySelector("ul");
+    if (!menu.classList.contains("visible")) {
+      gsap.fromTo(menu, { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.5 });
+      menu.classList.add("visible");
+    } else {
+      gsap.to(menu, { opacity: 0, y: -10, duration: 0.5, onComplete: () => menu.classList.remove("visible") });
+    }
+  });
+
+  // Handle Form Submission and Popup Validation
+  const form = document.querySelector("form");
+  const popup = document.getElementById("popup-message");
+  const closePopup = document.getElementById("close-popup");
+
+  form.addEventListener("submit", function(event) {
+    const selectedItems = document.querySelectorAll("input[name='selected_items']:checked");
+
+    if (selectedItems.length === 0) {
+      event.preventDefault(); // Prevent form submission
+
+      // Show popup message with GSAP animation
+      popup.style.display = "block";
+      gsap.fromTo(popup, { y: -100, opacity: 0 }, { y: -270, opacity: 1, duration: 0.5 });
+
+      return false; // Stop form submission
+    }
+  });
+
+  // Close the popup when the button is clicked
+  closePopup.addEventListener("click", function() {
+    gsap.to(popup, {y: -100, opacity: 0, duration: 0.5, onComplete: function() {
+      popup.style.display = "none";
+    }});
+  });
 });
 
 </script>
+
 </body>
 </html>

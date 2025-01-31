@@ -1,4 +1,4 @@
-<html>
+<!-- <html>
 <head>
 	<title> Email Auth App by Pranav </title>
 	<style>
@@ -33,5 +33,40 @@
 
 
 
+</body>
+</html> -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Fiesta - Forgot Password</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/urnp.css' %}"
+    />
+</head>
+<body>
+    <img src="{% static 'img/e_cell_logo.png' %}" alt="E-Cell Logo" class="ecell-logo">
+    <div class="container">
+        <img src="{% static 'img/FF_logo.png' %}" alt="Food Fiesta Logo" class="logo">
+        <h2 style="color: #e65c00;">Forgot Password</h2>
+        <form class="forgot-password-form" method="POST">
+			{% csrf_token %}
+            <div class="input-group">
+                <input type="email" id="email" name="un" required>
+                <label for="email">Email</label>
+            </div>
+            <button type="submit" class="btn">Reset Password</button>
+			<h4> We will email you new 6-Digit OTP </h4>
+			<h4> {{ msg }} </h4>
+            <div class="options">
+                <a href="{% url 'ulogin' %}" id="login">Back to Login</a>
+            </div>
+        </form>
+    </div>
 </body>
 </html>
