@@ -7,18 +7,23 @@
 }
 @font-face {
   font-family: "Fair Prosper";
-  src: url("../fonts/Fair Prosper.ttf") format("truetype");
+  src: url("./fonts/Fair Prosper.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Germansh";
-  src: url("../fonts/Germansh.ttf") format("truetype");
+  src: url("./fonts/Germansh.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
-
+@font-face {
+    font-family: 'Crima';
+    src: url('./fonts/Crima.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
 ::-webkit-scrollbar {
   display: none;
 }
@@ -27,11 +32,20 @@ html:focus-within {
   scroll-behavior: smooth;
 }
 
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+} 
 body {
   font-family: "Belgiano Serif";
-  padding: 20px;
   background-color: #dec1b2;
-  /* color: #333; */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: column;
+  /* background-color: red; */
 }
 
 .order-container {
@@ -39,12 +53,8 @@ body {
   padding: 25px 30px;
   border-radius: 12px;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-  /* max-width: 900px; */
-  /* margin: 20px auto; */
   max-width: 1000px;
   margin: 10vh auto 50px;
-  /* margin-top: 10vh; */
-
 }
 
 h1 {
@@ -168,6 +178,7 @@ form {
   height: 5vh;
   overflow: hidden;
   position: relative;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.333);
 }
 .back-home-button {
   padding: 15px 20px;
@@ -185,6 +196,7 @@ form {
   height: 5vh;
   overflow: hidden;
   position: relative;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.333);
 }
 
 .pay-button:hover {
@@ -204,10 +216,10 @@ input[type="number"]::-webkit-outer-spin-button {
   user-select: none;
 }
 .user-details {
-  width: 92%;
+  width: 100%;
   height: max-content;
   background-color: #f5ebe0ae;
-  padding: 5px 15px;
+  padding: 15px 15px;
   border-radius: 10px;
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.333);
   color: #333;
@@ -303,7 +315,10 @@ form div h2 {
   .back-home-button {
     background-color: #f44336;
   }
-
+  .back-home-button a{
+    text-decoration: none;
+    color: white;
+  }
   .back-home-button:hover {
     background-color: #e53935;
   }
@@ -336,12 +351,14 @@ form div h2 {
     font-size: 2vh;
   }
 }
-
 nav {
   width: 100vw;
   height: 9vh;
   background-color: #984643;
   color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   position: fixed;
   z-index: 99;
   top: 0;
@@ -349,17 +366,14 @@ nav {
   padding: 0 5vw;
   border-bottom: 1px solid #000;
   text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 }
 
 nav h2 {
   font-size: 2rem;
   font-family: "Fair Prosper";
   letter-spacing: 0.2vw;
-  /* margin-left: 2vw; */
-  margin-top: 4vh;
+  margin-left: 2vw;
+  margin-top: 2vh;
 }
 nav img {
   height: 50px;
@@ -367,10 +381,11 @@ nav img {
 }
 
 .nav-part2 {
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   font-size: 2.1rem;
-  /* background-color: blue; */
-  margin-right: 10vw;
+  margin-left: 10vw;
 }
 
 .nav-part2 details {
@@ -402,7 +417,6 @@ nav img {
   text-shadow: none;
   border-radius: 5px 5px 0 0;
   border-bottom: 1px solid #3f171725;
-  text-align: left;
 }
 
 .nav-part2 details ul li:last-child {
@@ -443,7 +457,7 @@ nav img {
 }
 .block {
   flex: 1;
-  background-color: salmon;
+  background-color:  #faedcd;
   transform: scaleY(1);
   will-change: transform;
   color: black;
@@ -452,16 +466,22 @@ nav img {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  font-family: "Fair Prosper";
+  /* font-family:'Crima'; */
   font-size: 4rem;
+}
+.revealtext1 img{
+  width: 300px;
+  height: 300px;
 }
 .revealtext2 {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  font-family: "Fair Prosper";
+  font-family: "Crima";
   text-align: center;
   font-size: 3rem;
+  padding-top: 5vh;
+  color: #7e1f1f; 
 }
 
 @media (min-width: 468px) {
@@ -470,6 +490,47 @@ nav img {
     font-size: 5vw;
   }
   .revealtext2 {
-    font-size: 3vw;
-  }
+    font-size:3vw;
+}
+}
+
+.footer {
+  background-color:#6f3230; /* Matching header color */
+  color: #fff;
+  text-align: center;
+  padding: 5px;
+  position: relative;
+  bottom: -10px;
+  left: 0;
+  width: 100vw;
+  font-size: 14px;
+  /* margin-top: 1vh; */
+}
+
+.footer-content {
+  max-width: 800px;
+  /* margin: auto; */
+}
+
+.social-media a {
+  color: #fff; /* Gold color for contrast */
+  text-decoration: none;
+  margin: 0 5px;
+}
+.social-media a i{
+  font-size: 1rem;
+  color:#fff;
+}
+.social-media a:hover {
+  text-decoration: none;
+}
+
+.contact p {
+  margin: 5px 0;
+}
+
+.navbar-logo {
+  height: 40px;
+  margin-right: 10px;
+  vertical-align: middle;
 }

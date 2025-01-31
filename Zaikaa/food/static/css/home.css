@@ -7,17 +7,22 @@
 }
 @font-face {
   font-family: "Fair Prosper";
-  src: url("../fonts/Fair Prosper.ttf") format("truetype");
+  src: url("./fonts/Fair Prosper.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: "Germansh";
-  src: url("../fonts/Germansh.ttf") format("truetype");
+  src: url("./fonts/Germansh.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
-
+@font-face {
+  font-family: "Crima";
+  src: url("./fonts/Crima.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
 ::-webkit-scrollbar {
   display: none;
 }
@@ -26,23 +31,28 @@ html:focus-within {
   scroll-behavior: smooth;
 }
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+} 
 body {
   font-family: "Belgiano Serif";
   background: #dec1b2;
-  margin: 0;
-  padding: 0;
-  color: #4a4a4a;
+  /* color: #4a4a4a; */
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 100vw;
-  margin-top: 7vh;
+  justify-content: space-between;
+  /* width: 100vw; */
+  /* margin-top: 7vh; */
+  min-height: 100vh;
+  /* gap: 5vh; */
 }
 
 .shop-container {
   max-width: 1000px;
-  margin: 6.5vh auto 50px;
+  margin: 14vh auto 50px;
   padding: 30px;
   background-color: #fff;
   border-radius: 12px;
@@ -154,7 +164,7 @@ button {
 }
 
 nav {
-  width: 95vw;
+  width: 100vw;
   height: 9vh;
   background-color: #984643;
   color: white;
@@ -164,6 +174,7 @@ nav {
   position: fixed;
   z-index: 99;
   top: 0px;
+  left: 0;
   padding: 0 5vw;
   border-bottom: 1px solid #000;
   text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
@@ -172,12 +183,9 @@ nav {
 nav h2 {
   font-size: 2rem;
   font-family: "Fair Prosper";
-  /* font-family: "Germansh"; */
   letter-spacing: 0.2vw;
-  /* padding-left: 2vw; */
-  /* background-color: blue; */
   margin-left: 2vw;
-  margin-top: 4vh;
+  margin-top: 2vh;
 }
 nav img {
   height: 50px;
@@ -189,7 +197,6 @@ nav img {
   justify-content: center;
   align-items: center;
   font-size: 2.1rem;
-  /* background-color: blue; */
   margin-left: 10vw;
 }
 
@@ -207,7 +214,7 @@ nav img {
   color: #000;
   position: absolute;
   right: 0%;
-  top: 40px;
+  top: 80px;
   width: max-content;
   border-radius: 10px;
   box-shadow: 0 0.2em 0.2rem rgba(0, 0, 0, 0.5);
@@ -300,37 +307,36 @@ label div {
 }
 
 /* Popup Styles */
-.popup{
+.popup {
   display: none;
-    position: fixed;
-    bottom: -200px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #984643;
-    color: white;
-    width: 200px;
-    padding: 15px 20px;
-    height: 120px;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: bold;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-    z-index: 5;
-    text-align: center;
+  position: fixed;
+  bottom: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #984643;
+  color: white;
+  width: 200px;
+  padding: 15px 20px;
+  height: 120px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 5;
+  text-align: center;
 }
 
 .popup button {
-    /* margin-left: 15px; */
-    padding: 5px 10px;
-    border: none;
-    background: white;
-    color: red;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 5px;
-    text-align: center;
+  /* margin-left: 15px; */
+  padding: 5px 10px;
+  border: none;
+  background: white;
+  color: red;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  text-align: center;
 }
-
 
 .transition {
   position: fixed;
@@ -355,7 +361,7 @@ label div {
 }
 .block {
   flex: 1;
-  background-color: salmon;
+  background-color: #faedcd;
   transform: scaleY(1);
   will-change: transform;
   color: black;
@@ -364,16 +370,22 @@ label div {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  font-family: "Fair Prosper";
+  /* font-family: "Fair Prosper"; */
   font-size: 4rem;
+}
+.revealtext1 img {
+  width: 300px;
+  height: 300px;
 }
 .revealtext2 {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  font-family: "Fair Prosper";
+  font-family: "Crima";
   text-align: center;
   font-size: 3rem;
+  padding-top: 5vh;
+  color: #7e1f1f; 
 }
 
 @media (min-width: 468px) {
@@ -382,6 +394,44 @@ label div {
     font-size: 5vw;
   }
   .revealtext2 {
-    font-size: 3vw;
-  }
+    font-size: 3vw;
+  }
+}
+
+.footer {
+  background-color:#6f3230; /* Matching header color */
+  color: #fff;
+  text-align: center;
+  padding: 5px;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  font-size: 14px;
+  margin-top: 1vh;
+  /* font-family: 'Crima'; */
+}
+
+.footer-content {
+  /* margin-top: 15px; */
+  max-width: 800px;
+  margin: auto;
+  /* background-color:red; */
+}
+
+.social-media a {
+  color: #fff; /* Gold color for contrast */
+  text-decoration: none;
+  margin: 0 5px;
+}
+.social-media a i{
+  font-size: 1rem;
+  /* padding-top: 5vh; */
+  color:#fff;
+}
+.social-media a:hover {
+  text-decoration: none;
+}
+
+.contact p {
+  margin: 5px 0;
 }

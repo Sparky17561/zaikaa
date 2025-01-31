@@ -12,10 +12,10 @@
 
     <div class="transition">
         <div class="transition-row row-1">
-            <div class="block revealtext1">Zaikaa</div>
+            <div class="block revealtext1"><img src="{% static 'img/FF_logo.png' %}" alt="ff_logo"></div>
         </div>
         <div class="transition-row row-2">
-            <div class="block revealtext2">FF-25</div>
+            <div class="block revealtext2">Food Fiesta</div>
         </div>
     </div>  
 
@@ -103,10 +103,28 @@
             <button type="submit" class="pay-button liquid-button" id="pay-online">Pay Online</button>
         </form>
 
-        <button class="back-home-button liquid-button" onclick="window.location.href='/food/'">Go Back to Home</button>
+        <button class="back-home-button liquid-button" ><a href="{% url 'home' %}" id="go-home-btn" >Go Back to Home</a></button>
 
     </div>
 
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 ECell. All rights reserved.</p>
+            
+            <div class="social-media">
+                
+                <a href="https://twitter.com/ecell" target="_blank"><i class="ri-twitter-fill"></i></a> |  
+                <a href="https://www.instagram.com/ecell" target="_blank"><i class="ri-instagram-fill"></i></a> |  
+                <a href="https://www.linkedin.com/company/ecell" target="_blank"><i class="ri-linkedin-box-fill"></i></a>
+            </div>
+    
+            <div class="contact">
+                <p><strong>Contact Us:</strong></p>
+                <p>Krishi Prasad  - 8591162728</p>
+                <p>Siddhesh kadam - 9321786781</p>
+            </div>
+        </div>
+    </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.0/gsap.min.js"></script>
     <script>
@@ -159,17 +177,6 @@
             });
         }
 
-
-
-            document.querySelector("details summary").addEventListener("click", function () {
-    const menu = this.parentElement.querySelector("ul");
-    if (!menu.classList.contains("visible")) {
-      gsap.fromTo(menu, { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.5, delay:.5 });
-      menu.classList.add("visible");
-    } else {
-      gsap.to(menu, { opacity: 0, y: -10,delay:.5 ,duration: 0.5, onComplete: () => menu.classList.remove("visible") });
-    }
-  });
     // GSAP Animation for .user-details (coming from the bottom)
     gsap.from(".user-details", {
         y: 50, // Moves from 50px below

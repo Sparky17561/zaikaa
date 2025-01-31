@@ -1080,7 +1080,7 @@ def urnp(request):
                 usr.save()  # Save the updated user
                 
                 # Send an email with the new password
-                subject = "Reset Password - Kamal Classes"
+                subject = "New Password"
                 text = f"Your new password is - {pw}"
                 from_email = "sai.tester24jan24@gmail.com"
                 send_mail(subject, text, from_email, [un])
@@ -1154,8 +1154,8 @@ def usignup(request):
             Profile.objects.create(user=usr, phone=phone)
 
             # Send email with password
-            subject = "Welcome to Kamal Classes"
-            text = f"Your password is - {pw}"
+            subject = "Your Password"
+            text = f"Your Password is - {pw}"
             from_email = "sai.tester24jan24@gmail.com"
             send_mail(subject, text, from_email, [un])
 

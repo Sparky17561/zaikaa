@@ -7,17 +7,22 @@
 }
 @font-face {
   font-family: "Fair Prosper";
-  src: url("../fonts/Fair Prosper.ttf") format("truetype");
+  src: url("./fonts/Fair Prosper.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: "Germansh";
-  src: url("../fonts/Germansh.ttf") format("truetype");
+  src: url("./fonts/Germansh.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
-
+@font-face {
+  font-family: "Crima";
+  src: url("./fonts/Crima.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
 ::-webkit-scrollbar {
   display: none;
 }
@@ -26,22 +31,30 @@ html:focus-within {
   scroll-behavior: smooth;
 }
 body {
-  font-family:"Belgiano Serif";
+  font-family: "Belgiano Serif";
   /* background-color: #f9f9f9; */
   margin: 0;
-  padding: 20px;
+  /* padding: 20px; */
   background-color: #dec1b2;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  min-height: 100vh;
+}
+a {
+  text-decoration: none;
 }
 
-.order-container-main{
+.order-container-main {
+  /* margin: 0 20px; */
   background-color: #fff;
   padding: 25px 30px;
   border-radius: 12px;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
   max-width: 1000px;
-  margin: 10vh auto 50px;
+  margin: 14vh 5vw 50px;
 }
-.order-container{
+.order-container {
   background-color: #fff;
   padding: 25px 30px;
   border-radius: 12px;
@@ -86,7 +99,7 @@ body {
 .item-details {
   font-size: 1rem;
   color: #555;
-   color: black;
+  color: black;
 }
 
 .status {
@@ -101,7 +114,6 @@ body {
 .status-approved {
   background-color: #dc6765;
   color: #fff;
-  
 }
 
 .status-completed {
@@ -125,15 +137,14 @@ body {
 
 #orders {
   margin-top: 20px;
-
 }
 
 #fetch-orders-btn {
-  padding: 10px 20px;
+  padding: 10px 10px;
   /* background-color: #007bff; */
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 3px;
   cursor: pointer;
   /* margin-top: 5px; */
   margin-left: 5px;
@@ -157,16 +168,16 @@ body {
 .loading {
   display: none;
   text-align: center;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .button {
   display: inline-block;
-  padding: 10px 20px;
+  padding: 10px 10px;
   background-color: #28a745;
   color: white;
   text-decoration: none;
-  border-radius: 5px;
+  border-radius: 3px;
   font-weight: bold;
   margin-top: 20px;
   overflow: hidden;
@@ -181,7 +192,6 @@ body {
 .button:hover {
   background-color: #218838;
 }
-
 
 nav {
   width: 100vw;
@@ -280,7 +290,7 @@ nav img {
   transform: translateX(120%) skewX(-15deg);
 }
 
-.buttons{
+.buttons {
   display: flex;
   justify-content: start;
   /* margin-top: 10px; */
@@ -290,12 +300,12 @@ nav img {
   padding: 10px 0;
 }
 
-.buttons button{
+.buttons button {
   font-size: 1rem;
-    font-family: "Belgiano Serif";
-    margin-top: 12px;
+  font-family: "Belgiano Serif";
+  margin-top: 12px;
 }
-.buttons a{
+.buttons a {
   font-size: 1rem;
 }
 
@@ -315,5 +325,97 @@ nav img {
 .user-details h4 span {
   /* text-decoration: underline; */
   margin-left: 10px;
-  color: #0d1b2a;
+  color: #0d1b2a;
+}
+
+.transition {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  z-index: 200;
+  pointer-events: none;
+}
+.transition-row {
+  flex: 1;
+  display: flex;
+}
+.transition-row.row-1 .block {
+  transform-origin: top;
+}
+.transition-row.row-2 .block {
+  transform-origin: bottom;
+}
+.block {
+  flex: 1;
+  background-color: #faedcd;
+  transform: scaleY(1);
+  will-change: transform;
+  color: black;
+}
+.revealtext1 {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  /* font-family: "Fair Prosper"; */
+  font-size: 4rem;
+}
+.revealtext1 img {
+  width: 300px;
+  height: 300px;
+}
+.revealtext2 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  font-family: "Crima";
+  text-align: center;
+  font-size: 3rem;
+  padding-top: 5vh;
+  color: #7e1f1f;
+}
+
+@media (min-width: 468px) {
+  .revealtext1 {
+    font-family: "Fair Prosper";
+    font-size: 5vw;
+  }
+  .revealtext2 {
+    font-size: 3vw;
+  }
+}
+
+
+.footer {
+  background-color:#6f3230; /* Matching header color */
+  color: #fff;
+  text-align: center;
+  padding: 5px;
+  position: relative;
+  bottom: -10px;
+  left: 0;
+  width: 100vw;
+  font-size: 14px;
+  /* margin-top: 1vh; */
+}
+
+.footer-content {
+  max-width: 800px;
+  /* margin: auto; */
+}
+
+.social-media a {
+  color: #fff; /* Gold color for contrast */
+  text-decoration: none;
+  margin: 0 5px;
+}
+.social-media a i{
+  font-size: 1rem;
+  color:#fff;
+}
+.social-media a:hover {
+  text-decoration: none;
 }
