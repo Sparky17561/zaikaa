@@ -1,21 +1,25 @@
-<!DOCTYPE html>
 {% load static %}
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Success</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/success.css' %}" />
-    <script src="{% static 'js/success.js' %}" defer></script>
-  </head>
-  <body>
-    <div class="container">
-      <h1>Order Approved</h1>
-      <p>Your order has been successfully approved!</p>
-      <div class="status" id="status">Token ID: {{ token_id }}</div>
 
-      <!-- View Orders Button -->
-      <a href="{% url 'past_orders_page' %}" class="btn">View Orders</a>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Order Approved</h1>
+        <p>Your order has been successfully approved!</p>
+        <div class="status" id="status">
+            Token ID: {{ token_id }}
+        </div>
+
+        <!-- View Orders Button -->
+        <a href="{% url 'past_orders_page' %}" class="btn">View Orders</a>
     </div>
-  </body>
+
+</body>
 </html>

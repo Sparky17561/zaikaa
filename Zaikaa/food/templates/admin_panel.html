@@ -51,16 +51,7 @@
                             {% else %}
                                 Not Available
                             {% endif %})
-                            <form action="{% url 'toggle_availability' item.id %}" method="POST">
-                                {% csrf_token %}
-                                <button type="submit">
-                                    {% if item.availability == 1 %}
-                                        Mark Unavailable
-                                    {% else %}
-                                        Mark Available
-                                    {% endif %}
-                                </button>
-                            </form>
+                        
                         </p>
                         {% endfor %}
                     {% else %}

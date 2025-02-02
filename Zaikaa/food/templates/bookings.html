@@ -6,11 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bookings</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/bookings.css' %}" />
-    <script src="{% static 'js/bookings.js' %}" defer></script>
+    <!-- <script src="{% static 'js/bookings.js' %}" defer></script> -->
 </head>
 <body>
 
     <h1>Approved Orders</h1>
+    <a href="{% url 'toggle_menu' %}" class="menu-toggle-link">Toggle Menu Items</a>
 
     <table>
         <thead>

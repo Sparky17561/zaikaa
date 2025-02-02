@@ -1,13 +1,22 @@
 from django.shortcuts import redirect, render
 from django.http import JsonResponse
-import json
-from datetime import datetime
-import random
-from django.views.decorators.csrf import csrf_exempt
-import logging
 from django.db import connection, transaction
 from django.http import HttpResponse
+from django.contrib.auth.models import User
+from django.contrib.auth import login,logout,authenticate
+from django.core.mail import send_mail
+from django.views.decorators.csrf import csrf_protect
+from django.contrib import messages
+import json
+from datetime import datetime
+import logging
 import re
+from random import *
+from .models import Profile  # Assuming Profile model exists
+logger = logging.getLogger(__name__)
+import razorpay
+import uuid
+
 # Home view to display all stalls and handle item selection
 
 def home(request):
@@ -80,10 +89,10 @@ def home(request):
             request.session['user_email'] = request.POST.get('email')
             request.session['user_phone'] = request.POST.get('phone')
             # Print the entire session to see what is stored
-            print(f"Session keys: {list(request.session.keys())}")
+            # print(f"Session keys: {list(request.session.keys())}")
 
             # Print the entire session dictionary
-            print(f"Full session data: {dict(request.session)}")
+            # print(f"Full session data: {dict(request.session)}")
             # Redirect to confirmation page
             return redirect('confirm_order')
 
@@ -109,7 +118,7 @@ def confirm_order(request):
             return redirect('home')
 
         # Pass the selected items and user details to the template
-        return render(request, 'food/confirm_order.html', {
+        return render(request, 'confirm_order.html', {
             'selected_items': selected_items,
             'user_name' : user_name,
             'user_email' : user_email,
@@ -119,17 +128,6 @@ def confirm_order(request):
         return redirect('ulogin')
 
 
-import json
-import logging
-import re
-from datetime import datetime
-from django.db import connection, transaction
-from django.shortcuts import redirect
-from django.http import HttpResponse
-
-# Set up logging
-logger = logging.getLogger(__name__)
-import json
 
 def settinguporder(request):
     # Get form data (from the form submitted)
@@ -143,8 +141,8 @@ def settinguporder(request):
     request.session['user_mobile'] = mobile
 
     # Log session data for debugging
-    print(f"Session keys: {list(request.session.keys())}")
-    print(f"Full session data: {dict(request.session)}")
+    # print(f"Session keys: {list(request.session.keys())}")
+    # print(f"Full session data: {dict(request.session)}")
 
     # Get selected items from session
     selected_items = request.session.get('selected_items', [])
@@ -156,26 +154,26 @@ def settinguporder(request):
     total_amount = float(request.POST.get('total'))  # Get the total amount from the form
     
     order_items_str = request.POST.get('order_items')
-    print(f"Order Items (raw): {order_items_str}")  # Log the raw order items data
+    # print(f"Order Items (raw): {order_items_str}")  # Log the raw order items data
 
     try:
         items = json.loads(order_items_str)  # Get a list of items from the form
     except json.JSONDecodeError as e:
-        print(f"Error decoding JSON for order_items: {e}")
+        # print(f"Error decoding JSON for order_items: {e}")
         return HttpResponse("Invalid order items data", status=400)
 
     # Print the data for debugging
-    print(f"User Name: {user_name}")
-    print(f"User Email: {user_email}")
-    print(f"Mobile: {mobile}")
-    print(f"Shop IDs (based on selected items): {shop_ids}")
-    print(f"Total Amount: {total_amount}")
-    print(f"Items: {items}")
+    # print(f"User Name: {user_name}")
+    # print(f"User Email: {user_email}")
+    # print(f"Mobile: {mobile}")
+    # print(f"Shop IDs (based on selected items): {shop_ids}")
+    # print(f"Total Amount: {total_amount}")
+    # print(f"Items: {items}")
 
     # Print the selected items for debugging
-    print("Selected Items:")
-    for item in selected_items:
-        print(f"Item Name: {item['item_name']}, Shop ID: {item['shop_id']}, Price: ₹{item['price']}")
+    # print("Selected Items:")
+    # for item in selected_items:
+    #     print(f"Item Name: {item['item_name']}, Shop ID: {item['shop_id']}, Price: ₹{item['price']}")
 
     try:
         with transaction.atomic():  # Start a transaction block
@@ -188,16 +186,16 @@ def settinguporder(request):
 
                 if result:
                     user_id = result[0]
-                    print(f"User ID already exists: {user_id}")
+                    # print(f"User ID already exists: {user_id}")
                 else:
                     cursor.execute(""" 
                         INSERT INTO "users" ("name", "email", "mobile")
                         VALUES (%s, %s, %s);
                     """, [user_name, user_email, mobile])
-                    print("Executed INSERT into users table")
+                    # print("Executed INSERT into users table")
                     cursor.execute('SELECT LASTVAL();')  # PostgreSQL equivalent for getting last inserted ID
                     user_id = cursor.fetchone()[0]
-                    print(f"User ID: {user_id}")
+                    # print(f"User ID: {user_id}")
 
             # Query 2: Check if items are available before inserting into "orderlist"
             with connection.cursor() as cursor:
@@ -225,7 +223,7 @@ def settinguporder(request):
                                     INSERT INTO "orderlist" ("email", "name", "contact_no", "shop_id", "item_name", "qty", "total_amt", "status")
                                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
                                 """, [user_email, user_name, mobile, shop_id, item_name_without_shop, quantity, total_price, 'Pending'])
-                                print(f"Executed INSERT into orderlist table: User ID = {user_id}, Shop ID = {shop_id}, Item = {item_name_without_shop}, Quantity = {quantity}, Price = {price}, Total Price = {total_price}")
+                                # print(f"Executed INSERT into orderlist table: User ID = {user_id}, Shop ID = {shop_id}, Item = {item_name_without_shop}, Quantity = {quantity}, Price = {price}, Total Price = {total_price}")
                             else:
                                 error_message = f"The item '{item_name_without_shop}' is unavailable at Shop ID {shop_id}. Please check availability or remove the item."
                                 raise Exception(error_message)
@@ -233,11 +231,11 @@ def settinguporder(request):
                             error_message = f"The item '{item_name_without_shop}' was not found in the menu at Shop ID {shop_id}. Please check availability or remove the item."
                             raise Exception(error_message)
 
-        print("Order processing completed successfully")
+        # print("Order processing completed successfully")
         return redirect('waiting')  # Redirect to a waiting page for further processing
 
     except Exception as e:
-        print(f"Error while processing the order: {e}")
+        # print(f"Error while processing the order: {e}")
         transaction.rollback()  # Rollback the transaction if an error occurs
         error_message = f"""
         An error occurred while processing your order. This could be because:
@@ -254,25 +252,8 @@ def settinguporder(request):
 
 
 
-import json
-import logging
-import random
-from datetime import datetime
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.db import connection
 
-# Set up logging
-logger = logging.getLogger(__name__)
-
-import json
-from random import randint
-from datetime import datetime
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.db import connection
-
-@csrf_exempt
+@csrf_protect
 def check_order_status(request):
     if request.method == "POST":
         try:
@@ -343,22 +324,21 @@ def check_order_status(request):
 def success(request, token_id):
     # You can check if the token ID exists in the database or its status here if needed
     # For now, we will just pass the token_id to the success page
-    return render(request, 'food/success.html', {'token_id': token_id})
+    return render(request, 'success.html', {'token_id': token_id})
 
 # views.py
 def waiting(request):
     # Retrieve user_email from session or another source
     user_email = request.session.get('user_email')  # Assuming it's passed from the form
-    print(f"User email from session: {user_email}")
-    return render(request, 'food/waiting.html', {
+    # print(f"User email from session: {user_email}")
+    return render(request, 'waiting.html', {
         'user_email': user_email
     })
 
 
 
 
-from django.shortcuts import render
-from django.db import connection
+
 
 def adminapproval(request):
     # Get all orders where the status is 'Pending'
@@ -371,11 +351,9 @@ def adminapproval(request):
         pending_orders = cursor.fetchall()
     
     # Render the adminapproval.html template and pass pending orders
-    return render(request, 'food/adminapproval.html', {'pending_orders': pending_orders})
+    return render(request, 'adminapproval.html', {'pending_orders': pending_orders})
 
 
-from django.shortcuts import redirect
-from django.db import connection
 
 def approve_order(request, order_id):
     # Approve the order by updating its status to 'Approved'
@@ -391,8 +369,7 @@ def approve_order(request, order_id):
 
 
 
-from django.shortcuts import render
-from django.db import connection
+
 
 def allorders(request):
     # Get all orders from the database
@@ -404,21 +381,12 @@ def allorders(request):
         all_orders = cursor.fetchall()
 
     # Render the allorders.html template and pass all orders
-    return render(request, 'food/allorders.html', {'all_orders': all_orders})
+    return render(request, 'allorders.html', {'all_orders': all_orders})
 
 
 
 
-logger = logging.getLogger(__name__)
 
-import json
-from datetime import datetime
-from django.db import connection
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_protect
-import logging
-
-logger = logging.getLogger(__name__)
 
 @csrf_protect
 def past_orders(request):
@@ -445,7 +413,7 @@ def past_orders(request):
 
             orders = []
             for token_id, timestamp, mode_of_payment in tokens:
-                logger.info(f"Fetching order for token_id: {token_id}")  # Log token_id
+                # logger.info(f"Fetching order for token_id: {token_id}")  # Log token_id
 
                 with connection.cursor() as cursor:
                     # Fetch items and their statuses for each token
@@ -478,16 +446,14 @@ def past_orders(request):
             return JsonResponse({"orders": orders}, status=200)
 
         except Exception as e:
-            logger.error(f"Error fetching past orders: {str(e)}")
+            # logger.error(f"Error fetching past orders: {str(e)}")
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
 
 
-from django.shortcuts import render
 
-from django.shortcuts import render, redirect
 
 def past_orders_page(request):
     if request.user.is_authenticated:
@@ -497,7 +463,7 @@ def past_orders_page(request):
         user_phone = request.session.get('user_phone', '')
 
         # Pass data to the template
-        return render(request, 'food/past_orders.html', {
+        return render(request, 'past_orders.html', {
             'user_email': user_email,
             'user_name': user_name,
             'user_phone': user_phone
@@ -511,15 +477,12 @@ def past_orders_page(request):
 
 
 
-from django.shortcuts import render, redirect
-from django.db import connection
-from django.contrib import messages
 
 def stall_login(request):
     if request.method == "POST":
         shop_id = request.POST.get('shop_id')
         passkey = request.POST.get('passkey')
-
+         
         if not shop_id or not passkey:
             messages.error(request, "Shop ID and passkey are required.")
             return redirect('stall_login')
@@ -542,8 +505,7 @@ def stall_login(request):
 
 
 
-from django.shortcuts import render, redirect
-from django.db import connection
+
 
 def bookings(request):
     shop_id = request.session.get('shop_id')
@@ -561,7 +523,7 @@ def bookings(request):
         orders = cursor.fetchall()
 
     # Debugging: print out orders to check if data is being fetched correctly
-    print("Orders:", orders)
+    # print("Orders:", orders)
 
     return render(request, 'bookings.html', {'orders': orders})
 
@@ -569,10 +531,6 @@ def bookings(request):
 
 
 
-from django.shortcuts import redirect
-from django.contrib import messages
-from django.db import connection
-from django.http import HttpResponse
 
 def update_order_status(request, order_id, status):
     if status not in ['completed', 'delivered']:
@@ -594,9 +552,7 @@ def update_order_status(request, order_id, status):
 
 
 
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.contrib import messages
+
 
 # Dummy admin credentials
 ADMIN_EMAIL = "saiprasad.jamdar17561@sakec.ac.in"
@@ -617,10 +573,6 @@ def admin_login(request):
     return render(request, 'admin_login.html')
 
 
-from django.shortcuts import render, redirect
-from django.db import connection
-from django.db import connection
-from django.shortcuts import render, redirect
 
 def admin_panel(request):
     if not request.session.get('admin_logged_in'):
@@ -635,10 +587,10 @@ def admin_panel(request):
         """)
         data = cursor.fetchall()
 
-    # Debugging: Print the raw data to see what's being fetched
-    print("Fetched data:", data)
+    # # Debugging: Print the raw data to see what's being fetched
+    # print("Fetched data:", data)
 
-    # Organize data into a structured format
+    # # Organize data into a structured format
     shops = {}
     for row in data:
         shop_id, shop_name, item_id, item_name, price, availability = row
@@ -656,13 +608,13 @@ def admin_panel(request):
                 'availability': availability
             })
 
-    # Debugging: Print the final structure of shops
-    print("Shops structure:", shops)
+    # # Debugging: Print the final structure of shops
+    # print("Shops structure:", shops)
 
     context = {
         'shops': shops
     }
-    return render(request, 'admin_panel.html', context)
+    return render(request, 'admin_panel.html',context)
 
 
 
@@ -671,9 +623,7 @@ def admin_logout(request):
     request.session.flush()
     return redirect('admin_login')
 
-from django.db import connection
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_protect
+
 
 @csrf_protect
 def add_shop(request):
@@ -707,12 +657,7 @@ def add_shop(request):
     return JsonResponse({'success': False, 'message': 'Invalid request.'})
 
 
-from django.views.decorators.csrf import csrf_protect
 
-from django.db import connection
-from django.shortcuts import redirect
-from django.views.decorators.csrf import csrf_protect
-from django.http import JsonResponse
 
 @csrf_protect
 def delete_shop(request, shop_id):
@@ -738,8 +683,8 @@ def delete_shop(request, shop_id):
 
 
 def shop_listing(request):
-    print(f"Session keys: {list(request.session.keys())}")  # Check the session keys
-    print(f"Admin logged in status: {request.session.get('admin_logged_in')}")  # Check if admin is logged in
+    # print(f"Session keys: {list(request.session.keys())}")  # Check the session keys
+    # print(f"Admin logged in status: {request.session.get('admin_logged_in')}")  # Check if admin is logged in
 
     if not request.session.get('admin_logged_in'):
         return redirect('admin_login')
@@ -748,18 +693,15 @@ def shop_listing(request):
 
 
 
-from django.db import connection
-from django.shortcuts import redirect
-from django.views.decorators.csrf import csrf_protect
-from django.http import JsonResponse
+
 
 @csrf_protect
 def toggle_availability(request, item_id):
-    print(f"Session keys: {list(request.session.keys())}")  # Check the session keys
-    print(f"Admin logged in status: {request.session.get('admin_logged_in')}")  # Check if admin is logged in
+    # print(f"Session keys: {list(request.session.keys())}")  # Check the session keys
+    # print(f"Admin logged in status: {request.session.get('admin_logged_in')}")  # Check if admin is logged in
 
-    if not request.session.get('admin_logged_in'):
-        return redirect('admin_login')
+    # if not request.session.get('admin_logged_in'):
+    #     return redirect('admin_login')
     
     if request.method == 'POST':
         try:
@@ -774,11 +716,11 @@ def toggle_availability(request, item_id):
                     """, [item_id])
 
             # After updating availability, check session and redirect
-            print(f"Updated availability for item_id: {item_id}")
-            return redirect('admin_panel')
+            # print(f"Updated availability for item_id: {item_id}")
+            return redirect('toggle_menu')
 
         except Exception as e:
-            print(f"Error: {str(e)}")
+            # print(f"Error: {str(e)}")
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request."})
@@ -792,64 +734,11 @@ def landing_page(request):
 
 
 
-from django.shortcuts import redirect
 
-import razorpay
-import json
-import random
-import re
-from datetime import datetime
-from django.http import HttpResponse
-from django.shortcuts import redirect
-from django.db import connection, transaction
-from django.conf import settings
-
-import json
-import re
-import random
-from datetime import datetime
-from django.db import connection, transaction
-from django.http import HttpResponse
-from django.shortcuts import redirect
-import razorpay
-from django.conf import settings
-
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
-import json
-import re
-from django.db import connection, transaction
-import razorpay
-from datetime import datetime
-import random
-
-from django.shortcuts import redirect
-import razorpay
-import random
-import re
-import logging
-from datetime import datetime
-from django.db import connection, transaction
-from django.shortcuts import redirect
-from django.http import JsonResponse
-
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
-
-import re
-
-import logging
-from random import randint
-import razorpay
-import re
-from datetime import datetime
-from django.db import connection, transaction
-from django.http import JsonResponse
-from django.shortcuts import redirect
 
 def payment_success_view(request):
     if request.method == 'GET':
-        logging.debug("Received GET request for payment success.")
+        # logging.debug("Received GET request for payment success.")
         
         payment_id = request.GET.get('payment_id')
         order_id = request.GET.get('order_id')
@@ -861,7 +750,7 @@ def payment_success_view(request):
                 user_email = request.session.get('user_email')
                 mobile = request.session.get('user_phone')
 
-                logging.debug(f"Session Data: user_name={user_name}, user_email={user_email}, mobile={mobile}")
+                # logging.debug(f"Session Data: user_name={user_name}, user_email={user_email}, mobile={mobile}")
 
                 # Check if session data exists
                 if not all([user_name, user_email, mobile]):
@@ -872,21 +761,21 @@ def payment_success_view(request):
 
                 # Verify payment with Razorpay
                 payment = client.payment.fetch(payment_id)
-                logging.debug(f"Fetched payment details: {payment}")
+                # logging.debug(f"Fetched payment details: {payment}")
 
                 if payment['status'] == 'captured':
-                    logging.debug("Payment captured successfully.")
+                    # logging.debug("Payment captured successfully.")
 
                     # Retrieve cart items
                     selected_items = request.session.get('selected_items', [])
                     if not selected_items:
                         return JsonResponse({'success': False, 'message': "No items in the session."})
                     
-                    logging.debug(f"Selected Items: {selected_items}")
+                    # logging.debug(f"Selected Items: {selected_items}")
 
                     try:
                         with transaction.atomic():
-                            logging.debug("Transaction started.")
+                            # logging.debug("Transaction started.")
 
                             # Query 1: Insert user into `users` table if not exists
                             with connection.cursor() as cursor:
@@ -897,14 +786,14 @@ def payment_success_view(request):
 
                                 if result:
                                     user_id = result[0]
-                                    logging.debug(f"User exists: user_id={user_id}")
+                                    # logging.debug(f"User exists: user_id={user_id}")
                                 else:
                                     cursor.execute(""" 
                                         INSERT INTO "users" ("name", "email", "mobile")
                                         VALUES (%s, %s, %s) RETURNING "user_id";
                                     """, [user_name, user_email, mobile])
                                     user_id = cursor.fetchone()[0]
-                                    logging.debug(f"Inserted new user: user_id={user_id}")
+                                    # logging.debug(f"Inserted new user: user_id={user_id}")
 
                             # Query 2: Check availability and insert order into `orderlist`
                             with connection.cursor() as cursor:
@@ -921,7 +810,7 @@ def payment_success_view(request):
                                     if not shop_id:
                                         raise Exception(f"Shop ID not found in item: {item_name}")
 
-                                    logging.debug(f"Extracted Shop ID: {shop_id}, Item Name: {item_name_without_shop}")
+                                    # logging.debug(f"Extracted Shop ID: {shop_id}, Item Name: {item_name_without_shop}")
 
                                     cursor.execute(""" 
                                         SELECT "availability" FROM "menuitems" WHERE "shop_id" = %s AND "name" = %s;
@@ -936,7 +825,7 @@ def payment_success_view(request):
                                                 INSERT INTO "orderlist" ("email", "name", "contact_no", "shop_id", "item_name", "qty", "total_amt", "status")
                                                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
                                             """, [user_email, user_name, mobile, shop_id, item_name_without_shop, quantity, total_price, 'Pending'])
-                                            logging.debug(f"Inserted order for {item_name_without_shop} at shop_id={shop_id}")
+                                            # logging.debug(f"Inserted order for {item_name_without_shop} at shop_id={shop_id}")
                                         else:
                                             raise Exception(f"The item '{item_name_without_shop}' is unavailable at Shop ID {shop_id}.")
                                     else:
@@ -945,7 +834,7 @@ def payment_success_view(request):
                             # ✅ **Fix: Generate token ID correctly**
                             token_id = randint(1000, 9999)  # Ensure random module is not overridden
                             timestamp = datetime.now()
-                            logging.debug(f"Generated token_id={token_id}, timestamp={timestamp}")
+                            # logging.debug(f"Generated token_id={token_id}, timestamp={timestamp}")
 
                             # Update orders with token ID and payment mode
                             with connection.cursor() as cursor:
@@ -954,7 +843,7 @@ def payment_success_view(request):
                                     SET "tokenid" = %s, "timestamp" = %s, "mode_of_payment" = 'Online'
                                     WHERE "email" = %s AND "status" = 'Pending' AND "tokenid" IS NULL;
                                 """, [token_id, timestamp, user_email])
-                                logging.debug("Updated orderlist with token ID and timestamp.")
+                                # logging.debug("Updated orderlist with token ID and timestamp.")
 
                             # Update order status to 'Approved'
                             with connection.cursor() as cursor:
@@ -963,43 +852,31 @@ def payment_success_view(request):
                                     SET "status" = 'Approved'
                                     WHERE "email" = %s AND "status" = 'Pending' AND "tokenid" = %s;
                                 """, [user_email, token_id])
-                                logging.debug("Updated orderlist status to 'Approved'.")
+                                # logging.debug("Updated orderlist status to 'Approved'.")
 
-                            logging.debug("Transaction committed successfully.")
+                            # logging.debug("Transaction committed successfully.")
                             return redirect('success', token_id=token_id)
 
                     except Exception as e:
-                        logging.error(f"Database transaction failed: {str(e)}")
+                        # logging.error(f"Database transaction failed: {str(e)}")
                         return JsonResponse({'success': False, 'message': f"Error occurred: {str(e)}"})
                 else:
-                    logging.debug("Payment status is not captured.")
+                    # logging.debug("Payment status is not captured.")
                     return JsonResponse({'success': False, 'message': "Payment failed or not captured."})
 
             except Exception as e:
-                logging.error(f"Payment verification failed: {str(e)}")
+                # logging.error(f"Payment verification failed: {str(e)}")
                 return JsonResponse({'success': False, 'message': f"Payment verification failed: {str(e)}"})
         else:
-            logging.debug("Missing payment_id or order_id.")
+            # logging.debug("Missing payment_id or order_id.")
             return JsonResponse({'success': False, 'message': 'Invalid payment or order details.'})
 
-    logging.debug("Invalid request method.")
+    # logging.debug("Invalid request method.")
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 
 
 
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import razorpay
-import uuid
-
-from django.shortcuts import render
-import razorpay
-import uuid
-
-import uuid
-import razorpay
 def generate_order_id(request):
     # Fetching user details from session
     user_details = {
@@ -1012,15 +889,15 @@ def generate_order_id(request):
     selected_items = request.POST.get('order_items', '[]')  # Get the JSON string of items
     selected_items = json.loads(selected_items)  # Convert the JSON string back to a Python object
 
-    print("Before updating quantities:", selected_items)  # Debugging line
+    # print("Before updating quantities:", selected_items)  # Debugging line
 
     # Update total_price based on quantity
     for item in selected_items:
         item_quantity = item['quantity']  # Ensure 'quantity' is present
-        print(f"Item quantity: {item_quantity}")  # Debugging line
+        # print(f"Item quantity: {item_quantity}")  # Debugging line
         item['total_price'] = float(item['price']) * item_quantity  # Update total price
 
-    print("After updating quantities:", selected_items)  # Debugging line
+    # print("After updating quantities:", selected_items)  # Debugging line
 
     # Recalculate total amount
     total_amount = sum(item['total_price'] for item in selected_items)
@@ -1047,21 +924,11 @@ def generate_order_id(request):
         'total_amount': total_amount,
         'razorpay_order_id': razorpay_order['id'],
     }
-    print(context)
+    # print(context)
     return render(request, 'pay_online.html', context)
 
 
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-from django.contrib.auth import login,logout,authenticate;
-from random import *
-from django.core.mail import send_mail
-from .models import Profile  # Assuming Profile model exists
 
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-from django.core.mail import send_mail
-from random import choice
 
 def urnp(request):
     # Check if the user is already authenticated
@@ -1096,11 +963,6 @@ def urnp(request):
 
 
 
-from django.contrib.auth import authenticate, login
-from django.shortcuts import render, redirect
-from django.core.mail import send_mail
-from django.contrib.auth.models import User
-from random import choice
 
 def ulogin(request):
     if request.user.is_authenticated:
@@ -1125,10 +987,8 @@ def ulogin(request):
             return render(request, "ulogin.html")
 
 
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-from django.core.mail import send_mail
-from random import choice
+
+
 
 def usignup(request):
     if request.user.is_authenticated:
@@ -1164,8 +1024,7 @@ def usignup(request):
             return render(request, "usignup.html")
 
 	
-from django.contrib.auth import logout
-from django.shortcuts import redirect
+
 
 def ulogout(request):
     # Clear the session when logging out
@@ -1174,3 +1033,59 @@ def ulogout(request):
     return redirect("ulogin")
 
 
+def toggle_menu(request):
+    shop_id = request.session.get('shop_id')  # Retrieve the shop_id from the session
+    if not shop_id:
+        return redirect('stall_login')  # Redirect to admin panel if no shop_id in session
+
+    # Fetch menu items of the specific shop from the database
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT m."id", m."name", m."price", m."availability"
+            FROM "menuitems" m
+            WHERE m."shop_id" = %s
+        """, [shop_id])
+        menu_items = cursor.fetchall()
+
+    # Debugging: Print fetched menu items
+    # print("Fetched menu items:", menu_items)
+
+    # Organize menu items into a structured format
+    items = []
+    for item in menu_items:
+        item_id, item_name, price, availability = item
+        items.append({
+            'id': item_id,
+            'name': item_name,
+            'price': price,
+            'availability': availability
+        })
+
+    # Pass the items to the template
+    context = {
+        'items': items
+    }
+    return render(request, 'menu.html', context)
+
+
+
+
+from django.conf.urls import handler403, handler400, handler404, handler500
+
+handler403 = 'food.views.custom_403'
+handler404 = 'food.views.custom_404'
+handler400 = 'food.views.custom_400'
+handler500 = 'food.views.custom_500'
+
+
+def custom_500(request):
+    return render(request, '500.html', status=500)
+
+def custom_404(request, exception):
+    return render(request, '404.html', status=404)
+
+def custom_403(request, exception):
+    return render(request, '403.html', status=403)
+
+def custom_400(request, exception):
+    return render(request, '400.html', status=400)

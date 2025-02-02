@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Items</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/menu.css' %}" />
+</head>
+<body>
+    <a href="{% url 'bookings' %}" class="menu-toggle-link">Back</a>
+
+
+    <div class="container">
+        <h1>Menu Items</h1>
+
+        {% if items %}
+            <div class="menu-items">
+                {% for item in items %}
+                    <p id="availability-{{ item.id }}">
+                        {{ item.name }} - ₹{{ item.price }} (Availability: 
+                        {% if item.availability == 1 %}
+                            Available
+                        {% else %}
+                            Not Available
+                        {% endif %})
+                        <form action="{% url 'toggle_availability' item.id %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit">
+                                {% if item.availability == 1 %}
+                                    Mark Unavailable
+                                {% else %}
+                                    Mark Available
+                                {% endif %}
+                            </button>
+                        </form>
+                        
+                        </form>
+                    </p>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No menu items found for this shop.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

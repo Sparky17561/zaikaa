@@ -70,3 +70,18 @@ td[colspan="8"] {
   font-style: italic;
   color: #777;
 }
+
+
+
+.menu-toggle-link {
+  display: inline-block;
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #2196F3;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+}
+.menu-toggle-link:hover {
+  background-color: #1976D2;
+}

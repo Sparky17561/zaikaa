@@ -1,92 +1,14 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pay Online</title>
-    <style>
-        /* Belgiano Serif Font */
-        @font-face {
-        font-family: "Belgiano Serif";
-        src: url("./fonts/Belgiano Serif 2.ttf") format("truetype");
-        font-weight: normal;
-        font-style: normal;
-        }
-        body {
-            font-family: "Belgiano Serif";
-            margin: 0;
-            padding: 0;
-            background: #dec1b2;
-            font-size: 16px
-        }
-        .container {
-            width: 80%;
-            margin: 30px auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        h2{
-           color: #984643;
-           text-align: left;
-           padding-bottom: 13px;
-           border-bottom: 1px solid #984643;
-        }
- 
-        .order-details {
-            
-            margin-bottom: 20px;
+    <link rel="stylesheet" type="text/css" href="{% static 'css/pay_online.css' %}" />
+    <script src="{% static 'js/pay_online.js' %}" defer></script>
 
-  
-        }
-        .cart-items{
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            
-        }
-        .cart-items ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        .cart-items ul li {
-            background-color: #f9f9f9;
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .total-amount {
-            font-size: 20px;
-            font-weight: bold;
-            color: #000;
-        }
-        .pay-button {
-            display: block;
-            margin: 20px auto;
-            background-color: #0a74da;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 18px;
-        }
-        .pay-button:hover {
-            background-color: #005b9f;
-        }
-        .payment-summary h3{
-            border-bottom: 1px solid green;
-            text-align: center;
-            color: green;
-        }
-        .order-item{
-            box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.5);
-        }
-    </style>
+    
 </head>
 <body>
 
@@ -130,27 +52,7 @@
 
 <!-- Razorpay Checkout Script -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<script>
-    // Razorpay payment handling
-    document.getElementById('pay-btn').onclick = function () {
-        var order_id = this.getAttribute('data-order-id');
 
-        var options = {
-            "key": "rzp_test_x6EYO4W3NIqb6X",  // Razorpay Key ID
-            "order_id": order_id,  // Order ID generated from backend
-            "handler": function (response) {
-                // Handle successful payment here
-                
-
-                // Redirect or trigger API call to complete the order
-                window.location.href = "/food/payment-success/?payment_id=" + response.razorpay_payment_id + "&order_id=" + order_id;
-            }
-        };
-
-        var rzp1 = new Razorpay(options);
-        rzp1.open();
-    };
-</script>
 
 </body>
 </html>

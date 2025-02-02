@@ -5,7 +5,7 @@ const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 document
   .getElementById("show-pending-orders-button")
   .addEventListener("click", function () {
-    window.location.href = "{% url 'adminapproval' %}";
+    window.location.href = "/admin/approval/";
   });
 
 // Function to delete shop

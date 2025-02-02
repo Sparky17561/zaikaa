@@ -1,158 +1,135 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confirm Order</title>
-    <style>
-        /* Add your existing CSS styles here */
+    <link rel="stylesheet" type="text/css" href="{% static 'css/confirm_order.css' %}" />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
+    <script src="{% static 'js/confirm_order.js' %}" defer></script>
 
-        .order-container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            background-color: #f9f9f9;
-        }
-
-        h1 {
-            text-align: center;
-        }
-
-        .form-field {
-            margin-bottom: 15px;
-        }
-
-        .form-field input {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            font-size: 14px;
-        }
-
-        #selected-items {
-            margin-bottom: 20px;
-        }
-
-        .order-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-        }
-
-        .item-name {
-            font-weight: bold;
-        }
-
-        .item-price {
-            color: #333;
-        }
-
-        .quantity-controls {
-            display: flex;
-            align-items: center;
-        }
-
-        .quantity-input {
-            width: 50px;
-            text-align: center;
-            margin: 0 5px;
-        }
-
-        .pay-button, .back-home-button {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-
-        .pay-button:hover, .back-home-button:hover {
-            background-color: #218838;
-        }
-
-        .pay-button:disabled {
-            background-color: #ccc;
-        }
-    </style>
 </head>
 <body>
+
+    <div class="transition">
+        <div class="transition-row row-1">
+            <div class="block revealtext1"><img src="{% static 'img/FF_logo.png' %}" alt="ff_logo"></div>
+        </div>
+        <div class="transition-row row-2">
+            <div class="block revealtext2">Food Fiesta</div>
+        </div>
+    </div>  
+
+    <nav>
+        <img src="{% static 'img/ecell-logo.png' %}" alt="ECell Logo" width="100" height="50">
+        <h2>Zaikaa</h2>
+        <div class="nav-part2">
+          <details>
+            <summary>
+              <i class="ri-menu-fold-line"></i>
+            </summary>
+            <ul>
+              <li><i class="ri-restaurant-line"><a href="{% url 'home' %}">Menu Page</a></i></li>
+              <li><i class="ri-shopping-bag-2-line"><a class="nav-link" href="{% url 'past_orders_page'%}">Past Orders</a></i></li>
+              <li><i class="ri-logout-box-r-line"><a class="nav-link" href="{% url 'ulogout'%}">Logout</a></i></li>
+
+            </ul>
+          </details>
+        </div>
+      </nav>
 
     <div class="order-container">
         <h1>Confirm Your Order</h1>
         
-        <!-- User Information -->
-        <div>
-            <h2>User Information</h2>
-            <div class="form-field">
-                <input type="text" id="name" placeholder="Enter your name" value="{{ user_name }}" disabled>
-            </div>
-            <div class="form-field">
-                <input type="email" id="email" placeholder="Enter your email" value="{{ user_email }}" disabled>
-            </div>
-            <div class="form-field">
-                <input type="text" id="phone" placeholder="Enter your mobile number" value="{{ user_phone }}" disabled>
-            </div>
-        </div>
-
-        <div id="selected-items">
-            <h2>Order Confirmation</h2>
-            <ul id="order-list">
-                {% for item in selected_items %}
-                    <li class="order-item" data-item-id="{{ forloop.counter }}">
-                        <div>
-                            <div class="item-name">{{ item.item_name }} (Shop ID: {{ item.shop_id }})</div>
-                            <div class="item-price">₹{{ item.price }}</div>
-                        </div>
-                        <div class="quantity-controls">
-                            <button type="button" class="decrease" data-item="{{ forloop.counter }}">-</button>
-                            <input type="number" class="quantity-input" data-item="{{ forloop.counter }}" value="1" min="1" disabled>
-                            <button type="button" class="increase" data-item="{{ forloop.counter }}">+</button>
-                        </div>
-                    </li>
-                {% endfor %}
-            </ul>
-
-            <div class="total">Total: ₹<span id="total-price">0</span></div>
-        </div>
-
-        <!-- Pay Online Button -->
-        <form action="{% url 'generate_order_id' %}" method="POST" id="online-payment-form">
+        <!-- User Information Form -->
+        <form action="{% url 'settinguporder' %}" method="POST" id="order-form">
             {% csrf_token %}
-            <button type="submit" class="pay-button" id="pay-online">Pay Online</button>
+            <div>
+                <h2>User Information</h2>
+                <div class="user-details liquid-button">
+                    <h4>Name: <span>{{ user_name|capfirst }}</span></h4>
+                    <h4>Email: <span>{{ user_email }}</span></h4>
+                    <h4>Phone: <span>{{ user_phone }}</span></h4>
+                </div>
+                <div class="form-field">
+                    <input type="text" name="name" placeholder="Enter your name" value="{{ user_name|capfirst }}" required hidden>
+                </div>
+                <div class="form-field">
+                    <input type="email" name="email" placeholder="Enter your email" value="{{ user_email }}" required hidden>
+                </div>
+                <div class="form-field">
+                    <input type="text" name="phone" placeholder="Enter your mobile number" value="{{ user_phone }}" required hidden>
+                </div>
+            </div>
+
+            <div id="selected-items">
+                <h2>Order Confirmation</h2>
+                <div id="order-list">
+                    {% for item in selected_items %}
+                        <div class="order-item" data-item-id="{{ forloop.counter }}">
+                            <div>
+                                <div class="item-name">{{ item.item_name }} (Shop ID: {{ item.shop_id }})</div>
+                                <div class="item-price">₹{{ item.price }}</div>
+                            </div>
+                            <div class="quantity-controls">
+                                <button type="button" class="decrease" data-item="{{ forloop.counter }}">-</button>
+                                <input type="number" class="quantity-input" data-item="{{ forloop.counter }}" value="1" min="1" readonly>
+                                <button type="button" class="increase" data-item="{{ forloop.counter }}">+</button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="total">Total: <span>₹ </span><span id="total-price">0</span></div>
+
+                <!-- Hidden input to send the total amount -->
+                <input type="hidden" name="total" id="total-input">
+
+                <!-- Hidden field to send the order items as JSON -->
+                <input type="hidden" name="order_items" id="order-items-input">
+
+                <button type="submit" class="pay-button liquid-button" id="pay-cash">Pay by Cash</button>
+                
+            </div>
+
         </form>
 
-        <button class="back-home-button" onclick="window.location.href='/food/'">Go Back to Home</button>
+        <!-- Pay Online Form -->
+        <form action="{% url 'generate_order_id' %}" method="POST" id="online-payment-form">
+            {% csrf_token %}
+            <!-- Hidden fields for order items and total amount -->
+            <input type="hidden" name="order_items" id="online-order-items-input">
+            <input type="hidden" name="total" id="online-total-input">
+            
+            <button type="submit" class="pay-button liquid-button" id="pay-online">Pay Online</button>
+        </form>
+
+        <button class="back-home-button liquid-button" ><a href="{% url 'home' %}" id="go-home-btn" >Go Back to Home</a></button>
+
     </div>
 
-    <script>
-        // Update price function
-        function updatePrice() {
-            let total = 0;
-            document.querySelectorAll('.order-item').forEach(item => {
-                const price = parseFloat(item.querySelector('.item-price').textContent.replace('₹', ''));
-                const quantity = parseInt(item.querySelector('.quantity-input').value);
-                total += price * quantity;
-            });
-            document.getElementById('total-price').textContent = total.toFixed(2);
-        }
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 ECell. All rights reserved.</p>
+            
+            <div class="social-media">
+                
+                <a href="https://twitter.com/ecell" target="_blank"><i class="ri-twitter-fill"></i></a> |  
+                <a href="https://www.instagram.com/ecell" target="_blank"><i class="ri-instagram-fill"></i></a> |  
+                <a href="https://www.linkedin.com/company/ecell" target="_blank"><i class="ri-linkedin-box-fill"></i></a>
+            </div>
+    
+            <div class="contact">
+                <p><strong>Contact Us:</strong></p>
+                <p>Krishi Prasad  - 8591162728</p>
+                <p>Siddhesh kadam - 9321786781</p>
+            </div>
+        </div>
+    </footer>
 
-        // Trigger price update on quantity change
-        document.querySelectorAll('.increase, .decrease').forEach(button => {
-            button.addEventListener('click', function () {
-                const input = this.parentElement.querySelector('.quantity-input');
-                input.value = this.classList.contains('increase') ? parseInt(input.value) + 1 : Math.max(1, parseInt(input.value) - 1);
-                updatePrice();
-            });
-        });
-
-        // Initial price update
-        updatePrice();
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.0/gsap.min.js"></script>
+    
 
 </body>
 </html>
